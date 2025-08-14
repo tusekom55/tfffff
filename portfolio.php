@@ -47,6 +47,9 @@ $currency_field = getCurrencyField($trading_currency);
 $currency_symbol = getCurrencySymbol($trading_currency);
 $balance = getUserBalance($user_id, $currency_field);
 
+// Get recent transactions for portfolio
+$recent_transactions = getUserTransactions($user_id, 20);
+
 include 'includes/header.php';
 ?>
 
@@ -280,6 +283,105 @@ include 'includes/header.php';
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- Transaction History -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">📋 İşlem Geçmişi</h5>
+                </div>
+                <div class="card-body p-0">
+                    <?php if (empty($recent_transactions)): ?>
+                    <div class="text-center py-5">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Henüz işlem geçmişi yok</h5>
+                        <p class="text-muted">
+                            İlk işleminizi yapmak için <a href="markets.php" class="text-decoration-none">piyasalar</a> sayfasını ziyaret edin.
+                        </p>
+                    </div>
+                    <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Tarih</th>
+                                    <th class="border-0">Varlık</th>
+                                    <th class="border-0 text-center">İşlem</th>
+                                    <th class="border-0 text-end">Miktar</th>
+                                    <th class="border-0 text-end">Fiyat</th>
+                                    <th class="border-0 text-end pe-4">Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recent_transactions as $transaction): ?>
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="fw-bold"><?php echo date('d.m.Y', strtotime($transaction['created_at'])); ?></div>
+                                        <small class="text-muted"><?php echo date('H:i', strtotime($transaction['created_at'])); ?></small>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                 style="width: 24px; height: 24px;">
+                                                <i class="fas fa-coins text-white" style="font-size: 10px;"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold"><?php echo $transaction['symbol']; ?></div>
+                                                <small class="text-muted"><?php echo $transaction['market_name'] ?: $transaction['symbol']; ?></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-3">
+                                        <span class="badge <?php echo $transaction['type'] == 'buy' ? 'bg-success' : 'bg-danger'; ?>">
+                                            <?php if ($transaction['type'] == 'buy'): ?>
+                                                <i class="fas fa-arrow-up me-1"></i>ALIM
+                                            <?php else: ?>
+                                                <i class="fas fa-arrow-down me-1"></i>SATIM
+                                            <?php endif; ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end py-3">
+                                        <div class="fw-bold"><?php echo formatTurkishNumber($transaction['amount'], 6); ?></div>
+                                        <small class="text-muted">adet</small>
+                                    </td>
+                                    <td class="text-end py-3">
+                                        <div><?php echo formatPrice($transaction['price']); ?></div>
+                                        <small class="text-muted">USD</small>
+                                    </td>
+                                    <td class="text-end py-3 pe-4">
+                                        <div class="fw-bold">
+                                            <?php 
+                                            if ($trading_currency == 1) {
+                                                echo formatTurkishNumber($transaction['total'], 2) . ' TL';
+                                            } else {
+                                                // Convert TL to USD if needed for display
+                                                $usd_total = $transaction['total'] / getUSDTRYRate();
+                                                echo formatTurkishNumber($usd_total, 2) . ' USD';
+                                            }
+                                            ?>
+                                        </div>
+                                        <?php if ($transaction['fee'] > 0): ?>
+                                        <small class="text-muted">Fee: <?php echo formatTurkishNumber($transaction['fee'], 2); ?></small>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Show All Transactions Link -->
+                    <div class="card-footer bg-white text-center">
+                        <a href="trading.php" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list me-2"></i>Tüm İşlem Geçmişini Gör
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Sell Modal -->
