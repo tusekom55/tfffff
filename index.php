@@ -654,6 +654,98 @@ $markets = getMarketData('us_stocks', 6);
             transform: translateY(-5px);
         }
         
+        /* Mobile Market Ticker Optimization */
+        @media (max-width: 768px) {
+            .markets-ticker {
+                padding: 40px 0 !important;
+            }
+            
+            .ticker-title {
+                font-size: 1.3rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .ticker-item {
+                min-width: 140px !important;
+                padding: 1rem !important;
+                border-radius: 8px !important;
+            }
+            
+            .ticker-item > div:first-child {
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .ticker-item img {
+                width: 24px !important;
+                height: 24px !important;
+                margin-right: 0.3rem !important;
+            }
+            
+            .ticker-item > div:first-child > div {
+                font-size: 1rem !important;
+                font-weight: 600 !important;
+            }
+            
+            .ticker-item > div:nth-child(2) {
+                font-size: 0.75rem !important;
+                margin-bottom: 0.3rem !important;
+                line-height: 1.2 !important;
+            }
+            
+            .ticker-item > div:nth-child(3) {
+                font-size: 0.9rem !important;
+                font-weight: 500 !important;
+                margin-bottom: 0.2rem !important;
+            }
+            
+            .ticker-item > div:last-child {
+                font-size: 0.75rem !important;
+                padding: 0.2rem 0.4rem !important;
+                border-radius: 3px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .markets-ticker {
+                padding: 30px 0 !important;
+            }
+            
+            .ticker-title {
+                font-size: 1.1rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .ticker-item {
+                min-width: 120px !important;
+                padding: 0.75rem !important;
+            }
+            
+            .ticker-item img {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            
+            .ticker-item > div:first-child > div {
+                font-size: 0.9rem !important;
+            }
+            
+            .ticker-item > div:nth-child(2) {
+                font-size: 0.7rem !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+            }
+            
+            .ticker-item > div:nth-child(3) {
+                font-size: 0.8rem !important;
+            }
+            
+            .ticker-item > div:last-child {
+                font-size: 0.7rem !important;
+            }
+        }
+        
         @keyframes ticker {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
