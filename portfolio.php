@@ -378,8 +378,14 @@ function showSellModal(symbol, name, quantity, price) {
 }
 
 function setSellPercentage(percentage) {
-    const quantity = maxQuantity * (percentage / 100);
-    document.getElementById('sellQuantity').value = quantity.toFixed(6);
+    if (percentage === 100) {
+        // "Tümü" butonunda tam değeri kullan (precision safe)
+        document.getElementById('sellQuantity').value = maxQuantity.toString();
+    } else {
+        // Diğer yüzdelerde normal rounded değer
+        const quantity = maxQuantity * (percentage / 100);
+        document.getElementById('sellQuantity').value = quantity.toFixed(6);
+    }
     calculateSellTotal();
 }
 
