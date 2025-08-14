@@ -303,7 +303,7 @@ include 'includes/header.php';
                     <div class="mb-3">
                         <label class="form-label">Satış Miktarı</label>
                         <input type="number" class="form-control" name="sell_quantity" id="sellQuantity" 
-                               step="0.000001" min="0" max="" required 
+                               step="any" min="0" max="" required 
                                oninput="calculateSellTotal()">
                         <small class="text-muted">
                             Mevcut: <span id="availableQuantity">0.000000</span> adet
