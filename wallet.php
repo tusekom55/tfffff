@@ -224,198 +224,126 @@ include 'includes/header.php';
                             </div>
                         </div>
                         
-                        <!-- Modern Withdraw Form -->
+                        <!-- Simple Withdraw Form -->
                         <div class="tab-pane fade" id="withdraw" role="tabpanel">
-                            <!-- Withdrawal Method Selection -->
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-4">
-                                    <div class="withdraw-method-card active" data-method="bank" onclick="selectWithdrawMethod('bank')">
-                                        <div class="text-center p-3">
-                                            <i class="fas fa-university fa-2x text-primary mb-2"></i>
-                                            <h6>Banka Havalesi</h6>
-                                            <small class="text-muted">1-2 iş günü</small>
-                                        </div>
-                                    </div>
+                            <form method="POST" action="">
+                                <!-- Ödeme Yöntemi -->
+                                <div class="mb-3">
+                                    <label class="form-label">Ödeme Yöntemi</label>
+                                    <select class="form-select" name="method" id="withdrawMethod" required>
+                                        <option value="">Seçiniz</option>
+                                        <option value="iban">🏦 Banka Havalesi</option>
+                                        <option value="papara">📱 Papara</option>
+                                        <option value="crypto">₿ Kripto Para</option>
+                                    </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="withdraw-method-card" data-method="papara" onclick="selectWithdrawMethod('papara')">
-                                        <div class="text-center p-3">
-                                            <img src="https://www.papara.com/images/papara-logo.png" alt="Papara" style="height: 32px;" class="mb-2">
-                                            <h6>Papara</h6>
-                                            <small class="text-muted">Anında işlem</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="withdraw-method-card" data-method="crypto" onclick="selectWithdrawMethod('crypto')">
-                                        <div class="text-center p-3">
-                                            <i class="fab fa-bitcoin fa-2x text-warning mb-2"></i>
-                                            <h6>Kripto Para</h6>
-                                            <small class="text-muted">Network ücreti</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <form method="POST" action="" id="withdrawForm">
                                 <!-- Kullanıcı Bilgileri -->
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Ad Soyad</label>
-                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['username']); ?>" readonly>
+                                        <input type="text" class="form-control" readonly value="<?php 
+                                        // Get user info from database
+                                        $database = new Database();
+                                        $db = $database->getConnection();
+                                        $query = "SELECT username FROM users WHERE id = ?";
+                                        $stmt = $db->prepare($query);
+                                        $stmt->execute([$user_id]);
+                                        $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+                                        echo htmlspecialchars($user_data['username'] ?? 'Kullan��cı');
+                                        ?>">
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">E-posta</label>
-                                        <input type="email" class="form-control" value="<?php echo htmlspecialchars($user['email']); ?>" readonly>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">TC Kimlik No</label>
-                                        <input type="text" class="form-control" name="tc_number" pattern="[0-9]{11}" 
+                                        <input type="text" class="form-control" name="tc_number" 
                                                placeholder="12345678901" maxlength="11" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Telefon Numarası</label>
-                                        <input type="tel" class="form-control" name="phone" 
-                                               placeholder="+90 555 123 45 67" required>
                                     </div>
                                 </div>
 
-                                <!-- Tutar Seçimi -->
+                                <div class="mb-3">
+                                    <label class="form-label">Telefon Numarası</label>
+                                    <input type="tel" class="form-control" name="phone" 
+                                           placeholder="0555 123 45 67" required>
+                                </div>
+
+                                <!-- Tutar -->
                                 <div class="mb-3">
                                     <label class="form-label">Çekilecek Tutar</label>
                                     <div class="input-group">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="adjustAmount(-10)">-10</button>
-                                        <input type="number" class="form-control text-center" name="amount" id="withdrawAmount" 
-                                               step="10" min="<?php echo MIN_WITHDRAWAL_AMOUNT; ?>" max="<?php echo $balance_tl; ?>" 
-                                               value="<?php echo MIN_WITHDRAWAL_AMOUNT; ?>" required>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="adjustAmount(10)">+10</button>
+                                        <input type="number" class="form-control" name="amount" 
+                                               step="10" min="<?php echo MIN_WITHDRAWAL_AMOUNT; ?>" 
+                                               max="<?php echo $balance_tl; ?>" 
+                                               placeholder="<?php echo MIN_WITHDRAWAL_AMOUNT; ?>" required>
                                         <span class="input-group-text">TL</span>
                                     </div>
-                                    <div class="d-flex justify-content-between mt-2">
+                                    <div class="d-flex justify-content-between mt-1">
                                         <small class="text-muted">
                                             Kullanılabilir: <?php echo formatNumber($balance_tl); ?> TL
                                         </small>
-                                        <button type="button" class="btn btn-link btn-sm p-0" onclick="setMaxAmount()">
-                                            Tümünü Çek
-                                        </button>
+                                        <div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm me-1" onclick="setAmount(100)">100</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm me-1" onclick="setAmount(500)">500</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(1000)">1000</button>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Banka Havalesi Detayları -->
-                                <div id="bankDetails" class="withdraw-details">
-                                    <h6 class="mb-3">🏦 Banka Seçiniz</h6>
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="ziraat" onclick="selectBank('ziraat')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Ziraat_Bankas%C4%B1_logo.svg/120px-Ziraat_Bankas%C4%B1_logo.svg.png" alt="Ziraat" class="bank-logo">
-                                                <small>Ziraat Bankası</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="akbank" onclick="selectBank('akbank')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Akbank_logo.svg/120px-Akbank_logo.svg.png" alt="Akbank" class="bank-logo">
-                                                <small>Akbank</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="garanti" onclick="selectBank('garanti')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/tr/thumb/4/4b/Garanti_BBVA_logo.svg/120px-Garanti_BBVA_logo.svg.png" alt="Garanti" class="bank-logo">
-                                                <small>Garanti BBVA</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="isbank" onclick="selectBank('isbank')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/İş_Bankası_logo.svg/120px-İş_Bankası_logo.svg.png" alt="İş Bankası" class="bank-logo">
-                                                <small>İş Bankası</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="vakifbank" onclick="selectBank('vakifbank')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/VakifBank_logo.svg/120px-VakifBank_logo.svg.png" alt="VakıfBank" class="bank-logo">
-                                                <small>VakıfBank</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bank-option" data-bank="halkbank" onclick="selectBank('halkbank')">
-                                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Halkbank_logo.svg/120px-Halkbank_logo.svg.png" alt="Halkbank" class="bank-logo">
-                                                <small>Halkbank</small>
-                                            </div>
-                                        </div>
+                                <!-- Banka Bilgileri -->
+                                <div id="bankDetails" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Banka</label>
+                                        <select class="form-select" name="bank_name">
+                                            <option value="">Banka Seçiniz</option>
+                                            <option value="ziraat">🟢 Ziraat Bankası</option>
+                                            <option value="akbank">🔵 Akbank</option>
+                                            <option value="garanti">🟠 Garanti BBVA</option>
+                                            <option value="isbank">🔴 İş Bankası</option>
+                                            <option value="vakifbank">🟡 VakıfBank</option>
+                                            <option value="halkbank">⚫ Halkbank</option>
+                                            <option value="other">🏦 Diğer</option>
+                                        </select>
                                     </div>
-                                    <input type="hidden" name="selected_bank" id="selectedBank">
                                     <div class="mb-3">
                                         <label class="form-label">IBAN</label>
                                         <input type="text" class="form-control" name="iban_info" 
-                                               placeholder="TR00 0000 0000 0000 0000 0000 00" maxlength="32" required>
+                                               placeholder="TR00 0000 0000 0000 0000 0000 00">
                                     </div>
                                 </div>
 
-                                <!-- Papara Detayları -->
-                                <div id="paparaDetails" class="withdraw-details" style="display: none;">
-                                    <h6 class="mb-3">📱 Papara Bilgileri</h6>
-                                    <div class="text-center mb-3">
-                                        <img src="https://www.papara.com/images/papara-logo.png" alt="Papara" style="height: 60px;">
-                                    </div>
+                                <!-- Papara Bilgileri -->
+                                <div id="paparaDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <label class="form-label">Papara Hesap No</label>
+                                        <label class="form-label">📱 Papara Hesap No</label>
                                         <input type="text" class="form-control" name="papara_info" 
                                                placeholder="1234567890">
                                     </div>
                                 </div>
 
-                                <!-- Kripto Para Detayları -->
-                                <div id="cryptoDetails" class="withdraw-details" style="display: none;">
-                                    <h6 class="mb-3">₿ Kripto Para Seçiniz</h6>
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-4">
-                                            <div class="crypto-option" data-crypto="bitcoin" onclick="selectCrypto('bitcoin')">
-                                                <i class="fab fa-bitcoin fa-2x text-warning"></i>
-                                                <small>Bitcoin (BTC)</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="crypto-option" data-crypto="ethereum" onclick="selectCrypto('ethereum')">
-                                                <i class="fab fa-ethereum fa-2x text-info"></i>
-                                                <small>Ethereum (ETH)</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="crypto-option" data-crypto="usdt" onclick="selectCrypto('usdt')">
-                                                <div class="crypto-logo">₮</div>
-                                                <small>Tether (USDT)</small>
-                                            </div>
-                                        </div>
+                                <!-- Kripto Bilgileri -->
+                                <div id="cryptoDetails" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Kripto Para</label>
+                                        <select class="form-select" name="crypto_type">
+                                            <option value="">Seçiniz</option>
+                                            <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                                            <option value="ethereum">⟠ Ethereum (ETH)</option>
+                                            <option value="usdt">₮ Tether (USDT)</option>
+                                        </select>
                                     </div>
-                                    <input type="hidden" name="selected_crypto" id="selectedCrypto">
                                     <div class="mb-3">
                                         <label class="form-label">Wallet Adresi</label>
                                         <input type="text" class="form-control" name="crypto_address" 
-                                               placeholder="Kripto para cüzdan adresinizi girin">
-                                    </div>
-                                    <div class="alert alert-warning">
-                                        <small>
-                                            <i class="fas fa-exclamation-triangle me-1"></i>
-                                            Network ücretleri çekim tutarından düşülecektir.
-                                        </small>
-                                    </div>
-                                </div>
-
-                                <input type="hidden" name="method" id="selectedMethod" value="bank">
-                                
-                                <div class="mb-3">
-                                    <div class="alert alert-info">
-                                        <small>
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Para çekme işlemi admin onayı gerektirir. İşlem süresi 1-3 iş günüdür.
-                                        </small>
+                                               placeholder="Cüzdan adresinizi girin">
                                     </div>
                                 </div>
                                 
-                                <button type="submit" name="withdraw" class="btn btn-danger w-100" id="withdrawButton">
-                                    <i class="fas fa-minus me-2"></i>Para Çek
+                                <div class="alert alert-info mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <small>Para çekme işlemi admin onayı gerektirir. İşlem süresi 1-3 iş günüdür.</small>
+                                </div>
+                                
+                                <button type="submit" name="withdraw" class="btn btn-danger w-100">
+                                    <i class="fas fa-arrow-down me-2"></i>Para Çek
                                 </button>
                             </form>
                         </div>
@@ -619,189 +547,53 @@ include 'includes/header.php';
 </style>
 
 <script>
-const maxAmount = <?php echo $balance_tl; ?>;
-const minAmount = <?php echo MIN_WITHDRAWAL_AMOUNT; ?>;
-
-// Withdrawal method selection
-function selectWithdrawMethod(method) {
-    // Update UI
-    document.querySelectorAll('.withdraw-method-card').forEach(card => {
-        card.classList.remove('active');
-    });
-    document.querySelector(`[data-method="${method}"]`).classList.add('active');
-    
-    // Show/hide details sections
-    document.getElementById('bankDetails').style.display = method === 'bank' ? 'block' : 'none';
-    document.getElementById('paparaDetails').style.display = method === 'papara' ? 'block' : 'none';
-    document.getElementById('cryptoDetails').style.display = method === 'crypto' ? 'block' : 'none';
-    
-    // Update hidden field
-    document.getElementById('selectedMethod').value = method;
-    
-    // Update form validation
-    updateFormValidation(method);
-}
-
-// Bank selection
-function selectBank(bank) {
-    document.querySelectorAll('.bank-option').forEach(option => {
-        option.classList.remove('active');
-    });
-    document.querySelector(`[data-bank="${bank}"]`).classList.add('active');
-    document.getElementById('selectedBank').value = bank;
-}
-
-// Crypto selection
-function selectCrypto(crypto) {
-    document.querySelectorAll('.crypto-option').forEach(option => {
-        option.classList.remove('active');
-    });
-    document.querySelector(`[data-crypto="${crypto}"]`).classList.add('active');
-    document.getElementById('selectedCrypto').value = crypto;
-}
-
-// Amount adjustment
-function adjustAmount(change) {
-    const amountInput = document.getElementById('withdrawAmount');
-    let currentAmount = parseFloat(amountInput.value) || minAmount;
-    let newAmount = currentAmount + change;
-    
-    // Bounds checking
-    if (newAmount < minAmount) newAmount = minAmount;
-    if (newAmount > maxAmount) newAmount = maxAmount;
-    
-    amountInput.value = newAmount;
-    updateWithdrawButton();
-}
-
-// Set maximum amount
-function setMaxAmount() {
-    document.getElementById('withdrawAmount').value = maxAmount;
-    updateWithdrawButton();
-}
-
-// Update withdraw button based on amount
-function updateWithdrawButton() {
-    const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
-    const button = document.getElementById('withdrawButton');
-    
-    if (amount < minAmount) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Minimum ' + minAmount + ' TL';
-        button.className = 'btn btn-secondary w-100';
-    } else if (amount > maxAmount) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Yetersiz Bakiye';
-        button.className = 'btn btn-secondary w-100';
-    } else {
-        button.disabled = false;
-        button.innerHTML = '<i class="fas fa-minus me-2"></i>Para Çek (' + amount.toLocaleString('tr-TR') + ' TL)';
-        button.className = 'btn btn-danger w-100';
+// Set amount quickly
+function setAmount(amount) {
+    const amountInput = document.querySelector('input[name="amount"]');
+    if (amountInput) {
+        amountInput.value = amount;
     }
 }
 
-// Form validation based on selected method
-function updateFormValidation(method) {
-    const ibanInput = document.querySelector('input[name="iban_info"]');
-    const paparaInput = document.querySelector('input[name="papara_info"]');
-    const cryptoAddressInput = document.querySelector('input[name="crypto_address"]');
-    
-    // Reset all requirements
-    [ibanInput, paparaInput, cryptoAddressInput].forEach(input => {
-        if (input) input.required = false;
-    });
-    
-    // Set requirements based on method
-    switch(method) {
-        case 'bank':
-            if (ibanInput) ibanInput.required = true;
-            break;
-        case 'papara':
-            if (paparaInput) paparaInput.required = true;
-            break;
-        case 'crypto':
-            if (cryptoAddressInput) cryptoAddressInput.required = true;
-            break;
+// TC Kimlik validation - sadece sayı
+function validateTC() {
+    const tcInput = document.querySelector('input[name="tc_number"]');
+    if (tcInput) {
+        tcInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Sadece sayılar
+            if (this.value.length > 11) {
+                this.value = this.value.substring(0, 11);
+            }
+        });
     }
 }
 
-// TC Kimlik validation
-document.querySelector('input[name="tc_number"]').addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, ''); // Only numbers
-    if (this.value.length > 11) {
-        this.value = this.value.substring(0, 11);
+// Show/hide method details
+document.getElementById('withdrawMethod').addEventListener('change', function() {
+    const method = this.value;
+    const bankDetails = document.getElementById('bankDetails');
+    const paparaDetails = document.getElementById('paparaDetails'); 
+    const cryptoDetails = document.getElementById('cryptoDetails');
+    
+    // Hide all details
+    [bankDetails, paparaDetails, cryptoDetails].forEach(el => {
+        if (el) el.style.display = 'none';
+    });
+    
+    // Show relevant details
+    if (method === 'iban' && bankDetails) {
+        bankDetails.style.display = 'block';
+    } else if (method === 'papara' && paparaDetails) {
+        paparaDetails.style.display = 'block';
+    } else if (method === 'crypto' && cryptoDetails) {
+        cryptoDetails.style.display = 'block';
     }
 });
 
-// Phone number formatting
-document.querySelector('input[name="phone"]').addEventListener('input', function() {
-    let value = this.value.replace(/\D/g, '');
-    if (value.startsWith('90')) {
-        value = value.substring(2);
-    }
-    if (value.length > 0) {
-        if (value.length <= 3) {
-            this.value = '+90 ' + value;
-        } else if (value.length <= 6) {
-            this.value = '+90 ' + value.substring(0, 3) + ' ' + value.substring(3);
-        } else if (value.length <= 8) {
-            this.value = '+90 ' + value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
-        } else {
-            this.value = '+90 ' + value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
-        }
-    }
-});
-
-// IBAN formatting
-document.querySelector('input[name="iban_info"]').addEventListener('input', function() {
-    let value = this.value.replace(/\s/g, '').toUpperCase();
-    if (!value.startsWith('TR')) {
-        value = 'TR' + value.replace(/TR/g, '');
-    }
-    
-    // Format with spaces every 4 characters
-    let formatted = '';
-    for (let i = 0; i < value.length; i += 4) {
-        if (i > 0) formatted += ' ';
-        formatted += value.substr(i, 4);
-    }
-    
-    this.value = formatted;
-});
-
-// Amount input listener
-document.getElementById('withdrawAmount').addEventListener('input', updateWithdrawButton);
-
-// Initialize
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    updateWithdrawButton();
+    validateTC();
 });
-
-// Legacy method selector (for old form compatibility)
-if (document.getElementById('withdrawMethod')) {
-    document.getElementById('withdrawMethod').addEventListener('change', function() {
-        const method = this.value;
-        const ibanInfo = document.getElementById('ibanInfo');
-        const paparaInfo = document.getElementById('paparaInfo');
-        
-        if (method === 'iban') {
-            ibanInfo.style.display = 'block';
-            paparaInfo.style.display = 'none';
-            ibanInfo.querySelector('textarea').required = true;
-            paparaInfo.querySelector('input').required = false;
-        } else if (method === 'papara') {
-            ibanInfo.style.display = 'none';
-            paparaInfo.style.display = 'block';
-            ibanInfo.querySelector('textarea').required = false;
-            paparaInfo.querySelector('input').required = true;
-        } else {
-            ibanInfo.style.display = 'none';
-            paparaInfo.style.display = 'none';
-            ibanInfo.querySelector('textarea').required = false;
-            paparaInfo.querySelector('input').required = false;
-        }
-    });
-}
 </script>
 
 <?php include 'includes/footer.php'; ?>
