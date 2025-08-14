@@ -1032,6 +1032,10 @@ $markets = getMarketData('us_stocks', 6);
                     <i class="fas fa-chart-pie"></i>
                     <span><?php echo getCurrentLang() == 'tr' ? 'Portföy' : 'Portfolio'; ?></span>
                 </a>
+                <a href="wallet.php" class="nav-link">
+                    <i class="fas fa-wallet"></i>
+                    <span><?php echo getCurrentLang() == 'tr' ? 'Cüzdan' : 'Wallet'; ?></span>
+                </a>
                 <a href="profile.php" class="nav-link">
                     <i class="fas fa-user"></i>
                     <span><?php echo getCurrentLang() == 'tr' ? 'Profil' : 'Profile'; ?></span>
