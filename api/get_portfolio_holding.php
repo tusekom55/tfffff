@@ -1,98 +1,77 @@
 <?php
-// STEP BY STEP API BUILD
+// STANDALONE API - Hiçbir include yok
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
+// Session start
+@session_start();
+
+// Basit login check
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'User not logged in',
+        'step' => 'login_check_failed'
+    ]);
+    exit;
+}
+
+// Input validation
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (!$input || !isset($input['symbol'])) {
+    echo json_encode([
+        'success' => false,
+        'error' => 'Symbol parameter required',
+        'step' => 'input_validation_failed'
+    ]);
+    exit;
+}
+
+$symbol = $input['symbol'];
+$user_id = $_SESSION['user_id'];
+
 try {
-    // Step 1: Session
-    if (session_status() === PHP_SESSION_NONE) {
-        @session_start();
-    }
+    // Direct database connection
+    $db = new PDO(
+        'mysql:host=localhost;dbname=u904974154_khaki;charset=utf8', 
+        'u904974154_khaki', 
+        'Khaki123!',
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
     
-    // Step 2: Include config files first - API'dan bakınca path farklı
-    if (!class_exists('Database')) {
-        require_once '../config/database.php';
-    }
-    if (!defined('FMP_API_KEY')) {
-        require_once '../config/api_keys.php';
-    }
-    if (!function_exists('t')) {
-        require_once '../config/languages.php';
-    }
+    // Check portfolio
+    $query = "SELECT * FROM user_portfolio WHERE user_id = ? AND symbol = ?";
+    $stmt = $db->prepare($query);
+    $stmt->execute([$user_id, $symbol]);
+    $holding = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Step 3: Include functions after config files
-    if (!function_exists('isLoggedIn')) {
-        require_once '../includes/functions.php';
-    }
-    
-    // Step 3: Login check
-    if (!function_exists('isLoggedIn') || !isLoggedIn()) {
+    if ($holding && isset($holding['quantity']) && $holding['quantity'] > 0) {
         echo json_encode([
-            'success' => false,
-            'error' => 'User not logged in',
-            'step' => 'login_check_failed'
+            'success' => true,
+            'holding' => [
+                'symbol' => $holding['symbol'],
+                'quantity' => (float)$holding['quantity'],
+                'avg_price' => (float)$holding['avg_price'],
+                'total_invested' => (float)$holding['total_invested']
+            ],
+            'step' => 'portfolio_found'
         ]);
-        exit;
-    }
-    
-    // Step 4: Get input
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$input || !isset($input['symbol'])) {
-        echo json_encode([
-            'success' => false,
-            'error' => 'Symbol parameter required',
-            'step' => 'input_validation_failed'
-        ]);
-        exit;
-    }
-    
-    $symbol = $input['symbol'];
-    $user_id = $_SESSION['user_id'];
-    
-    // Step 5: Portfolio check
-    if (function_exists('getPortfolioHolding')) {
-        $holding = getPortfolioHolding($user_id, $symbol);
-        
-        if ($holding && isset($holding['quantity']) && $holding['quantity'] > 0) {
-            echo json_encode([
-                'success' => true,
-                'holding' => [
-                    'symbol' => $holding['symbol'],
-                    'quantity' => (float)$holding['quantity'],
-                    'avg_price' => (float)$holding['avg_price'],
-                    'total_invested' => (float)$holding['total_invested']
-                ],
-                'step' => 'portfolio_found'
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false,
-                'error' => 'No holding found for this symbol',
-                'step' => 'no_holding_found',
-                'user_id' => $user_id,
-                'symbol' => $symbol
-            ]);
-        }
     } else {
         echo json_encode([
             'success' => false,
-            'error' => 'getPortfolioHolding function not found',
-            'step' => 'function_missing'
+            'error' => 'No holding found for this symbol',
+            'step' => 'no_holding_found',
+            'user_id' => $user_id,
+            'symbol' => $symbol
         ]);
     }
     
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
-        'error' => 'Exception: ' . $e->getMessage(),
-        'step' => 'exception_caught'
-    ]);
-} catch (Error $e) {
-    echo json_encode([
-        'success' => false,
-        'error' => 'Fatal Error: ' . $e->getMessage(),
-        'step' => 'fatal_error_caught'
+        'error' => 'Database error: ' . $e->getMessage(),
+        'step' => 'database_error'
     ]);
 }
 ?>
