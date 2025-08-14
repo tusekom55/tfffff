@@ -906,17 +906,34 @@ foreach($_SESSION as $session_key => $session_value) {
     }
 }
 
-/* Sticky Categories Navigation */
+/* Auto-Hide Header Navigation System */
+.navbar.header-hidden {
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.navbar.header-visible {
+    transform: translateY(0) !important;
+    transition: transform 0.3s ease !important;
+}
+
+/* Full-Width Sticky Categories (Header Hidden Mode) */
 .categories-sticky {
     position: fixed !important;
-    top: 76px !important; /* Below navbar */
+    top: 0 !important; /* Take over header position */
     left: 0 !important;
     right: 0 !important;
-    z-index: 1020 !important;
+    z-index: 1030 !important; /* Higher than hidden header */
     background: #fff !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.15) !important;
     border-bottom: 1px solid #e9ecef !important;
     transition: all 0.3s ease !important;
+    padding: 15px 0 !important;
+}
+
+.categories-sticky.header-visible {
+    top: 76px !important; /* Below visible header */
+    z-index: 1020 !important;
     padding: 20px 0 !important;
 }
 
@@ -926,8 +943,13 @@ foreach($_SESSION as $session_key => $session_value) {
 }
 
 .categories-sticky .category-card {
-    transform: scale(0.9) !important;
+    transform: scale(0.85) !important;
     margin-bottom: 0 !important;
+    transition: transform 0.3s ease !important;
+}
+
+.categories-sticky.header-visible .category-card {
+    transform: scale(0.9) !important;
 }
 
 .categories-sticky h5 {
@@ -938,23 +960,61 @@ foreach($_SESSION as $session_key => $session_value) {
     margin-bottom: 0 !important;
 }
 
-/* Mobile sticky categories */
+/* Mobile sticky categories with auto-hide */
 .mobile-category-tabs.sticky {
     position: fixed !important;
-    top: 76px !important;
+    top: 0 !important; /* Take over header position */
     left: 0 !important;
     right: 0 !important;
-    z-index: 1020 !important;
+    z-index: 1030 !important;
     margin-bottom: 0 !important;
+    background: #fff !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    transition: all 0.3s ease !important;
 }
 
-/* Sticky offset compensation */
+.mobile-category-tabs.sticky.header-visible {
+    top: 76px !important;
+    z-index: 1020 !important;
+}
+
+/* Offset compensation for auto-hide system */
 .sticky-offset {
-    margin-top: 120px;
+    margin-top: 80px; /* Categories height when header hidden */
+    transition: margin-top 0.3s ease !important;
+}
+
+.sticky-offset.header-visible {
+    margin-top: 120px; /* Categories + header height */
 }
 
 .mobile-sticky-offset {
-    margin-top: 80px;
+    margin-top: 60px; /* Mobile categories height */
+    transition: margin-top 0.3s ease !important;
+}
+
+.mobile-sticky-offset.header-visible {
+    margin-top: 80px; /* Mobile categories + header height */
+}
+
+/* Header auto-hide enhancement */
+.navbar {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Enhanced category cards for full-width mode */
+.categories-sticky .category-card {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.categories-sticky .category-card:hover {
+    transform: scale(0.87) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+}
+
+.categories-sticky.header-visible .category-card:hover {
+    transform: scale(0.92) !important;
 }
 
 @media (max-width: 768px) {
@@ -2025,14 +2085,17 @@ function testModal() {
     modal.show();
 }
 
-// Sticky Categories Navigation System
+// Auto-Hide Header & Sticky Categories Navigation System
 let lastScrollTop = 0;
 let categoriesOriginalPosition = null;
 let isSticky = false;
+let isHeaderHidden = false;
+let scrollTimeout = null;
 
 function initStickyCategories() {
     const desktopCategories = document.querySelector('.desktop-categories');
     const mobileCategories = document.querySelector('.mobile-category-tabs');
+    const navbar = document.querySelector('.navbar');
     const container = document.querySelector('.container');
     
     if (desktopCategories) {
@@ -2041,61 +2104,157 @@ function initStickyCategories() {
     
     function handleScroll() {
         const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-        const navbar = document.querySelector('.navbar');
         const navbarHeight = navbar ? navbar.offsetHeight : 76;
+        const scrollDirection = currentScroll > lastScrollTop ? 'down' : 'up';
+        const scrollDelta = Math.abs(currentScroll - lastScrollTop);
         
-        // Desktop sticky behavior
+        // Clear existing timeout
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+        }
+        
+        // Auto-hide header logic (only when scrolling significantly)
+        if (scrollDelta > 5) { // Minimum scroll threshold
+            if (scrollDirection === 'down' && currentScroll > 100 && !isHeaderHidden) {
+                // Hide header when scrolling down
+                navbar.classList.remove('header-visible');
+                navbar.classList.add('header-hidden');
+                isHeaderHidden = true;
+                console.log('🔽 Header hidden');
+                
+                // Update sticky categories to take over top position
+                if (isSticky) {
+                    updateCategoriesPosition(false);
+                }
+                
+            } else if (scrollDirection === 'up' && isHeaderHidden) {
+                // Show header when scrolling up
+                navbar.classList.remove('header-hidden');
+                navbar.classList.add('header-visible');
+                isHeaderHidden = false;
+                console.log('🔼 Header visible');
+                
+                // Update sticky categories to go below header
+                if (isSticky) {
+                    updateCategoriesPosition(true);
+                }
+            }
+        }
+        
+        // Desktop sticky behavior with auto-hide integration
         if (window.innerWidth >= 769 && desktopCategories) {
-            if (currentScroll >= categoriesOriginalPosition - navbarHeight - 20 && !isSticky) {
+            const stickThreshold = categoriesOriginalPosition - navbarHeight - 20;
+            const unstickThreshold = categoriesOriginalPosition - navbarHeight - 100;
+            
+            if (currentScroll >= stickThreshold && !isSticky) {
                 // Make sticky
                 desktopCategories.classList.add('categories-sticky');
+                updateCategoriesPosition(!isHeaderHidden);
                 isSticky = true;
                 
                 // Add offset to next element
                 const nextElement = desktopCategories.nextElementSibling;
                 if (nextElement) {
                     nextElement.classList.add('sticky-offset');
+                    updateOffsetMargin(nextElement, !isHeaderHidden);
                 }
-            } else if (currentScroll < categoriesOriginalPosition - navbarHeight - 20 && isSticky) {
+                
+                console.log('📌 Categories sticky');
+                
+            } else if (currentScroll <= unstickThreshold && isSticky) {
                 // Remove sticky
-                desktopCategories.classList.remove('categories-sticky');
+                desktopCategories.classList.remove('categories-sticky', 'header-visible');
                 isSticky = false;
                 
                 // Remove offset
                 const nextElement = desktopCategories.nextElementSibling;
                 if (nextElement) {
-                    nextElement.classList.remove('sticky-offset');
+                    nextElement.classList.remove('sticky-offset', 'header-visible');
                 }
+                
+                console.log('📌 Categories unsticky');
             }
         }
         
-        // Mobile sticky behavior
+        // Mobile sticky behavior with auto-hide integration
         if (window.innerWidth < 769 && mobileCategories) {
             const categoriesPosition = mobileCategories.offsetTop;
+            const stickThreshold = categoriesPosition - (isHeaderHidden ? 0 : navbarHeight);
+            const unstickThreshold = categoriesPosition - navbarHeight - 80;
             
-            if (currentScroll >= categoriesPosition - navbarHeight && !mobileCategories.classList.contains('sticky')) {
+            if (currentScroll >= stickThreshold && !mobileCategories.classList.contains('sticky')) {
                 mobileCategories.classList.add('sticky');
+                updateMobileCategoriesPosition(!isHeaderHidden);
                 
                 // Add offset to content
                 const nextElement = mobileCategories.nextElementSibling;
                 if (nextElement) {
                     nextElement.classList.add('mobile-sticky-offset');
+                    updateMobileOffsetMargin(nextElement, !isHeaderHidden);
                 }
-            } else if (currentScroll < categoriesPosition - navbarHeight && mobileCategories.classList.contains('sticky')) {
-                mobileCategories.classList.remove('sticky');
+                
+            } else if (currentScroll <= unstickThreshold && mobileCategories.classList.contains('sticky')) {
+                mobileCategories.classList.remove('sticky', 'header-visible');
                 
                 // Remove offset
                 const nextElement = mobileCategories.nextElementSibling;
                 if (nextElement) {
-                    nextElement.classList.remove('mobile-sticky-offset');
+                    nextElement.classList.remove('mobile-sticky-offset', 'header-visible');
                 }
             }
         }
         
         lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+        
+        // Set timeout to handle end of scrolling
+        scrollTimeout = setTimeout(() => {
+            console.log('📜 Scroll ended at:', currentScroll);
+        }, 150);
     }
     
-    // Throttled scroll event
+    // Update categories position based on header visibility
+    function updateCategoriesPosition(headerVisible) {
+        const desktopCategories = document.querySelector('.desktop-categories.categories-sticky');
+        if (desktopCategories) {
+            if (headerVisible) {
+                desktopCategories.classList.add('header-visible');
+            } else {
+                desktopCategories.classList.remove('header-visible');
+            }
+        }
+    }
+    
+    // Update mobile categories position
+    function updateMobileCategoriesPosition(headerVisible) {
+        const mobileCategories = document.querySelector('.mobile-category-tabs.sticky');
+        if (mobileCategories) {
+            if (headerVisible) {
+                mobileCategories.classList.add('header-visible');
+            } else {
+                mobileCategories.classList.remove('header-visible');
+            }
+        }
+    }
+    
+    // Update offset margins for content
+    function updateOffsetMargin(element, headerVisible) {
+        if (headerVisible) {
+            element.classList.add('header-visible');
+        } else {
+            element.classList.remove('header-visible');
+        }
+    }
+    
+    // Update mobile offset margins
+    function updateMobileOffsetMargin(element, headerVisible) {
+        if (headerVisible) {
+            element.classList.add('header-visible');
+        } else {
+            element.classList.remove('header-visible');
+        }
+    }
+    
+    // Throttled scroll event with RAF
     let ticking = false;
     window.addEventListener('scroll', function() {
         if (!ticking) {
@@ -2109,21 +2268,30 @@ function initStickyCategories() {
     
     // Handle window resize
     window.addEventListener('resize', function() {
-        // Reset sticky state on resize
+        // Reset all states on resize
+        if (navbar) {
+            navbar.classList.remove('header-hidden', 'header-visible');
+        }
+        
         if (desktopCategories) {
-            desktopCategories.classList.remove('categories-sticky');
+            desktopCategories.classList.remove('categories-sticky', 'header-visible');
             categoriesOriginalPosition = desktopCategories.offsetTop;
         }
-        if (mobileCategories) {
-            mobileCategories.classList.remove('sticky');
-        }
-        isSticky = false;
         
-        // Remove all offsets
+        if (mobileCategories) {
+            mobileCategories.classList.remove('sticky', 'header-visible');
+        }
+        
+        isSticky = false;
+        isHeaderHidden = false;
+        
+        // Remove all offsets and classes
         const elements = document.querySelectorAll('.sticky-offset, .mobile-sticky-offset');
         elements.forEach(el => {
-            el.classList.remove('sticky-offset', 'mobile-sticky-offset');
+            el.classList.remove('sticky-offset', 'mobile-sticky-offset', 'header-visible');
         });
+        
+        console.log('🔄 Reset on resize');
     });
 }
 
