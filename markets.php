@@ -1461,16 +1461,20 @@ function loadPortfolioHolding(symbol, currentPrice) {
     .then(data => {
         if (data.success && data.holding) {
             showPortfolioHolding(data.holding, currentPrice);
+            enableSellMode(data.holding, currentPrice);
         } else {
             hidePortfolioHolding();
+            disableSellMode(symbol);
         }
     })
     .catch(error => {
         console.error('Error loading portfolio holding:', error);
         hidePortfolioHolding();
+        disableSellMode(symbol);
     });
     <?php else: ?>
     hidePortfolioHolding();
+    disableSellMode(symbol);
     <?php endif; ?>
 }
 
@@ -1537,29 +1541,243 @@ function setPortfolioSellPercentage(percentage) {
     }
 }
 
-// Calculate simple trade for sell
-function calculateSimpleTradeSell() {
-    const usdAmount = parseFloat(document.getElementById('usd_amount_sell').value) || 0;
-    const priceUSD = parseFloat(document.getElementById('modalPrice').textContent.replace(',', '.'));
+// Enable sell mode when user has portfolio holding
+function enableSellMode(holding, currentPrice) {
+    // Show portfolio-style sell form
+    const sellPane = document.getElementById('sell-pane');
+    if (sellPane) {
+        // Change sell form to portfolio-style
+        setupPortfolioSellForm(holding, currentPrice);
+    }
+}
+
+// Disable sell mode when user has no portfolio holding
+function disableSellMode(symbol) {
+    const sellPane = document.getElementById('sell-pane');
+    if (sellPane) {
+        // Show "no holding" message
+        setupNoHoldingMessage(symbol);
+    }
+}
+
+// Setup portfolio-style sell form (like portfolio.php)
+function setupPortfolioSellForm(holding, currentPrice) {
+    const sellPane = document.getElementById('sell-pane');
     
-    if (usdAmount <= 0) {
+    // Create portfolio-style sell form HTML
+    const portfolioSellHTML = `
+        <!-- Portfolio Holdings Display -->
+        <div class="mb-3" id="portfolioSellHolding">
+            <div class="card bg-light border-0">
+                <div class="card-body p-3">
+                    <h6 class="card-title mb-2">💼 Mevcut Portföy</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <div class="fw-bold">${formatTurkishNumber(holding.quantity, 6)} adet</div>
+                            <small class="text-muted">Sahip olduğunuz miktar</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold">$${formatTurkishNumber(holding.quantity * currentPrice, 2)}</div>
+                            <small class="text-muted">güncel değer</small>
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <small class="text-muted">Ort. Fiyat:</small><br>
+                            <span class="fw-bold">$${formatTurkishNumber(holding.avg_price, 4)}</span>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Kar/Zarar:</small><br>
+                            <span class="fw-bold ${(holding.quantity * currentPrice - holding.total_invested) >= 0 ? 'text-success' : 'text-danger'}">
+                                ${((holding.quantity * currentPrice - holding.total_invested) >= 0 ? '+' : '')}$${formatTurkishNumber(Math.abs(holding.quantity * currentPrice - holding.total_invested), 2)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="portfolioSellForm" method="POST" action="">
+            <input type="hidden" name="trade_action" value="sell">
+            <input type="hidden" name="symbol" id="sellSymbolHidden" value="">
+            
+            <div class="mb-3">
+                <label class="form-label">Satış Miktarı (USD)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" id="portfolioSellAmount" name="usd_amount" 
+                           step="0.01" min="0.01" max="${(holding.quantity * currentPrice).toFixed(2)}" 
+                           placeholder="0.00" oninput="calculatePortfolioSell()" required>
+                    <span class="input-group-text">USD</span>
+                </div>
+                <small class="text-muted">
+                    Maksimum: $${formatTurkishNumber(holding.quantity * currentPrice, 2)} 
+                    (${formatTurkishNumber(holding.quantity, 6)} adet)
+                </small>
+            </div>
+            
+            <!-- Quick Sell Buttons -->
+            <div class="mb-3">
+                <small class="text-muted d-block mb-2">Hızlı Seçim:</small>
+                <div class="d-grid gap-2">
+                    <div class="row g-2">
+                        <div class="col-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickSellPercentage(25)">%25</button>
+                        </div>
+                        <div class="col-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickSellPercentage(50)">%50</button>
+                        </div>
+                        <div class="col-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="setQuickSellPercentage(75)">%75</button>
+                        </div>
+                        <div class="col-3">
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="setQuickSellPercentage(100)">Tümü</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sell Summary -->
+            <div class="card border-0 bg-light mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Satış Tutarı:</small>
+                        <small class="fw-bold" id="portfolioSellTotal">$0.00</small>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Satış Miktarı:</small>
+                        <small class="fw-bold" id="portfolioSellQuantity">0.000000 adet</small>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Alacağınız Tutar:</small>
+                        <small class="fw-bold text-success" id="portfolioSellNet">${CURRENCY_SYMBOL} 0.00</small>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-danger w-100" id="portfolioSellButton">
+                <i class="fas fa-hand-holding-usd me-2"></i>PORTFÖYDEN SAT
+            </button>
+        </form>
+    `;
+    
+    // Replace the sell pane content
+    sellPane.innerHTML = portfolioSellHTML;
+    
+    // Store holding data globally
+    window.currentPortfolioHolding = holding;
+    window.currentPortfolioPrice = currentPrice;
+    
+    // Set hidden symbol field
+    document.getElementById('sellSymbolHidden').value = holding.symbol;
+}
+
+// Setup no holding message
+function setupNoHoldingMessage(symbol) {
+    const sellPane = document.getElementById('sell-pane');
+    
+    const noHoldingHTML = `
+        <div class="text-center py-5">
+            <i class="fas fa-exclamation-circle fa-3x text-warning mb-3"></i>
+            <h5 class="text-muted mb-3">Bu varlığa sahip değilsiniz</h5>
+            <p class="text-muted mb-4">
+                <strong>${symbol}</strong> satabilmek için önce satın almanız gerekiyor.
+            </p>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-success" onclick="switchToBuyTab()">
+                    <i class="fas fa-shopping-cart me-2"></i>Önce Satın Al
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="window.open('portfolio.php', '_blank')">
+                    <i class="fas fa-chart-pie me-2"></i>Portföyümü Gör
+                </button>
+            </div>
+        </div>
+    `;
+    
+    sellPane.innerHTML = noHoldingHTML;
+}
+
+// Switch to buy tab function
+function switchToBuyTab() {
+    const buyTab = document.getElementById('buy-tab');
+    const sellTab = document.getElementById('sell-tab');
+    const buyPane = document.getElementById('buy-pane');
+    const sellPane = document.getElementById('sell-pane');
+    
+    buyTab.classList.add('active');
+    sellTab.classList.remove('active');
+    buyPane.classList.add('show', 'active');
+    sellPane.classList.remove('show', 'active');
+}
+
+// Portfolio sell calculation (like portfolio.php)
+function calculatePortfolioSell() {
+    const usdAmount = parseFloat(document.getElementById('portfolioSellAmount').value) || 0;
+    
+    if (!window.currentPortfolioHolding || !window.currentPortfolioPrice) {
         return;
     }
     
-    // Check if user has enough in portfolio
-    if (window.currentHolding) {
-        const maxValue = window.currentHolding.quantity * priceUSD;
-        if (usdAmount > maxValue) {
-            // Show warning or limit to max value
-            const sellInput = document.getElementById('usd_amount_sell');
-            sellInput.value = maxValue.toFixed(2);
-        }
+    const holding = window.currentPortfolioHolding;
+    const currentPrice = window.currentPortfolioPrice;
+    const maxValue = holding.quantity * currentPrice;
+    
+    // Validate amount
+    if (usdAmount > maxValue) {
+        document.getElementById('portfolioSellAmount').value = maxValue.toFixed(2);
+        return calculatePortfolioSell(); // Recalculate with corrected value
     }
     
-    // Update calculations here (similar to buy calculations)
-    const fee = usdAmount * 0.001; // 0.1% fee
+    if (usdAmount <= 0) {
+        // Reset displays
+        document.getElementById('portfolioSellTotal').textContent = '$0.00';
+        document.getElementById('portfolioSellQuantity').textContent = '0.000000 adet';
+        document.getElementById('portfolioSellNet').textContent = CURRENCY_SYMBOL + ' 0.00';
+        
+        // Reset button
+        const sellButton = document.getElementById('portfolioSellButton');
+        sellButton.disabled = false;
+        sellButton.className = 'btn btn-danger w-100';
+        sellButton.innerHTML = '<i class="fas fa-hand-holding-usd me-2"></i>PORTFÖYDEN SAT';
+        return;
+    }
     
-    // You can add more calculation display here
+    // Calculate sell quantity
+    const sellQuantity = usdAmount / currentPrice;
+    const fee = 0; // No fee
+    const netUSD = usdAmount - fee;
+    
+    // Update displays
+    document.getElementById('portfolioSellTotal').textContent = '$' + formatTurkishNumber(usdAmount, 2);
+    document.getElementById('portfolioSellQuantity').textContent = formatTurkishNumber(sellQuantity, 6) + ' adet';
+    
+    // Convert to trading currency
+    if (TRADING_CURRENCY === 1) { // TL mode
+        const netTL = netUSD * USD_TRY_RATE;
+        document.getElementById('portfolioSellNet').textContent = formatTurkishNumber(netTL, 2) + ' TL';
+    } else { // USD mode
+        document.getElementById('portfolioSellNet').textContent = '$' + formatTurkishNumber(netUSD, 2);
+    }
+    
+    // Update button
+    const sellButton = document.getElementById('portfolioSellButton');
+    sellButton.disabled = false;
+    sellButton.className = 'btn btn-danger w-100';
+    sellButton.innerHTML = '<i class="fas fa-hand-holding-usd me-2"></i>PORTFÖYDEN SAT';
+}
+
+// Quick sell percentage function (like portfolio.php)
+function setQuickSellPercentage(percentage) {
+    if (!window.currentPortfolioHolding || !window.currentPortfolioPrice) {
+        return;
+    }
+    
+    const holding = window.currentPortfolioHolding;
+    const currentPrice = window.currentPortfolioPrice;
+    const maxValue = holding.quantity * currentPrice;
+    const sellValue = maxValue * (percentage / 100);
+    
+    document.getElementById('portfolioSellAmount').value = sellValue.toFixed(2);
+    calculatePortfolioSell();
 }
 
 // Copy trading forms to mobile tab

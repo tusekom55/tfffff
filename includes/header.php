@@ -164,6 +164,11 @@ if (!in_array($current_page, $public_pages)) {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'wallet.php' ? 'active' : ''; ?>" href="wallet.php">
+                            <i class="fas fa-wallet me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Cüzdan' : 'Wallet'; ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>" href="profile.php">
                             <i class="fas fa-user me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Profil' : 'Profile'; ?>
                         </a>
