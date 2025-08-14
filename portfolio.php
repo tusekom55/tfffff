@@ -53,72 +53,238 @@ $recent_transactions = getUserTransactions($user_id, 20);
 include 'includes/header.php';
 ?>
 
+<!-- Modern Portfolio Styles -->
+<style>
+.portfolio-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.portfolio-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    transform: translate(30px, -30px);
+}
+
+.portfolio-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.portfolio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.metric-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    line-height: 1.2;
+}
+
+.metric-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.metric-subtitle {
+    color: #adb5bd;
+    font-size: 0.75rem;
+}
+
+.holdings-table {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.table-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.asset-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.asset-info h6 {
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.asset-info small {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.performance-positive {
+    color: #10b981 !important;
+    font-weight: 600;
+}
+
+.performance-negative {
+    color: #ef4444 !important;
+    font-weight: 600;
+}
+
+.action-buttons .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.action-buttons .btn:hover {
+    transform: translateY(-1px);
+}
+
+.distribution-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.distribution-item:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+}
+
+.progress-modern {
+    height: 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+}
+
+.progress-modern .progress-bar {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+    .portfolio-header {
+        padding: 2rem 1.5rem;
+        text-align: center;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
 <div class="container" style="padding-top: 2rem;">
-    <!-- Portfolio Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="mb-3">
-                <h2 class="h3 mb-1">💼 Portföyüm</h2>
-                <p class="text-muted mb-0">Sahip olduğunuz varlıklar ve performansları</p>
+    <!-- Professional Portfolio Header -->
+    <div class="portfolio-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2 fw-bold">Portfolio Overview</h1>
+                <p class="mb-0 opacity-90">Monitor your investments and track performance in real-time</p>
+            </div>
+            <div class="col-md-4 text-md-end text-center mt-3 mt-md-0">
+                <div class="d-inline-flex align-items-center bg-white bg-opacity-20 rounded-pill px-3 py-2">
+                    <div class="text-center">
+                        <div class="h5 mb-0 fw-bold"><?php echo count($portfolio); ?></div>
+                        <small class="opacity-75">Assets</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Portfolio Stats Cards -->
-    <div class="row mb-4">
+    <!-- Professional Stats Cards -->
+    <div class="row mb-4 g-3">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="display-6 mb-2">💰</div>
-                    <h6 class="text-muted mb-2">Toplam Portföy Değeri</h6>
-                    <div class="h4 mb-0 text-primary fw-bold">
-                        <?php 
-                        if ($trading_currency == 1) {
-                            echo formatTurkishNumber(convertUSDToTL($portfolio_stats['current_value']), 2) . ' TL';
-                        } else {
-                            echo formatTurkishNumber($portfolio_stats['current_value'], 2) . ' USD';
-                        }
-                        ?>
-                    </div>
-                    <small class="text-muted">
-                        Yatırım: <?php 
-                        $invested_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['total_invested']) : $portfolio_stats['total_invested'];
-                        echo formatTurkishNumber($invested_display, 2) . ' ' . $currency_symbol;
-                        ?>
-                    </small>
+            <div class="portfolio-card">
+                <div class="metric-icon bg-primary bg-opacity-10">
+                    <i class="fas fa-wallet text-primary"></i>
+                </div>
+                <div class="metric-label">Total Portfolio Value</div>
+                <div class="metric-value text-dark">
+                    <?php 
+                    if ($trading_currency == 1) {
+                        echo formatTurkishNumber(convertUSDToTL($portfolio_stats['current_value']), 2) . ' TL';
+                    } else {
+                        echo formatTurkishNumber($portfolio_stats['current_value'], 2) . ' USD';
+                    }
+                    ?>
+                </div>
+                <div class="metric-subtitle">
+                    Total Investment: <?php 
+                    $invested_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['total_invested']) : $portfolio_stats['total_invested'];
+                    echo formatTurkishNumber($invested_display, 2) . ' ' . $currency_symbol;
+                    ?>
                 </div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="display-6 mb-2"><?php echo $portfolio_stats['profit_loss'] >= 0 ? '📈' : '📉'; ?></div>
-                    <h6 class="text-muted mb-2">Toplam Kar/Zarar</h6>
-                    <div class="h4 mb-0 fw-bold <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'text-success' : 'text-danger'; ?>">
-                        <?php 
-                        $profit_loss_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['profit_loss']) : $portfolio_stats['profit_loss'];
-                        echo ($portfolio_stats['profit_loss'] >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_display, 2) . ' ' . $currency_symbol;
-                        ?>
-                    </div>
-                    <small class="<?php echo $portfolio_stats['profit_loss_percentage'] >= 0 ? 'text-success' : 'text-danger'; ?> fw-semibold">
-                        <?php echo ($portfolio_stats['profit_loss_percentage'] >= 0 ? '+' : '') . formatTurkishNumber($portfolio_stats['profit_loss_percentage'], 2); ?>% Getiri
-                    </small>
+            <div class="portfolio-card">
+                <div class="metric-icon <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'bg-success' : 'bg-danger'; ?> bg-opacity-10">
+                    <i class="fas <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'fa-trending-up text-success' : 'fa-trending-down text-danger'; ?>"></i>
+                </div>
+                <div class="metric-label">Total P&L</div>
+                <div class="metric-value <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'performance-positive' : 'performance-negative'; ?>">
+                    <?php 
+                    $profit_loss_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['profit_loss']) : $portfolio_stats['profit_loss'];
+                    echo ($portfolio_stats['profit_loss'] >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_display, 2) . ' ' . $currency_symbol;
+                    ?>
+                </div>
+                <div class="metric-subtitle <?php echo $portfolio_stats['profit_loss_percentage'] >= 0 ? 'performance-positive' : 'performance-negative'; ?>">
+                    <?php echo ($portfolio_stats['profit_loss_percentage'] >= 0 ? '+' : '') . formatTurkishNumber($portfolio_stats['profit_loss_percentage'], 2); ?>% Return
                 </div>
             </div>
         </div>
         
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="display-6 mb-2">📊</div>
-                    <h6 class="text-muted mb-2">Portföy Durumu</h6>
-                    <div class="h4 mb-0 fw-bold text-info">
-                        <?php echo count($portfolio); ?> Varlık
-                    </div>
-                    <small class="text-muted">
-                        Mevcut bakiye: <?php echo formatTurkishNumber($balance, 2) . ' ' . $currency_symbol; ?>
-                    </small>
+            <div class="portfolio-card">
+                <div class="metric-icon bg-info bg-opacity-10">
+                    <i class="fas fa-chart-line text-info"></i>
+                </div>
+                <div class="metric-label">Available Balance</div>
+                <div class="metric-value text-dark">
+                    <?php echo formatTurkishNumber($balance, 2) . ' ' . $currency_symbol; ?>
+                </div>
+                <div class="metric-subtitle">
+                    Ready for investment
                 </div>
             </div>
         </div>
@@ -136,37 +302,44 @@ include 'includes/header.php';
     </div>
     <?php endif; ?>
 
-    <!-- Portfolio Holdings -->
+    <!-- Professional Holdings Table -->
     <div class="row">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">📊 Varlıklarım</h5>
+            <div class="holdings-table">
+                <div class="table-header p-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="fas fa-briefcase me-2"></i>Portfolio Holdings
+                    </h5>
                 </div>
-                <div class="card-body p-0">
+                <div class="p-0">
                     <?php if (empty($portfolio)): ?>
                     <div class="text-center py-5">
-                        <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Henüz portföyünüzde varlık yok</h5>
-                        <p class="text-muted">
-                            Yatırım yapmak için <a href="markets.php" class="text-decoration-none">piyasalar</a> sayfasını ziyaret edin.
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-chart-pie fa-2x text-muted"></i>
+                            </div>
+                        </div>
+                        <h5 class="text-dark mb-2">Start Your Investment Journey</h5>
+                        <p class="text-muted mb-4">
+                            Build your portfolio by investing in stocks, crypto, and other assets
                         </p>
-                        <a href="markets.php" class="btn btn-primary">
-                            <i class="fas fa-chart-line me-2"></i>Piyasalara Git
+                        <a href="markets.php" class="btn btn-primary btn-lg rounded-pill px-4">
+                            <i class="fas fa-plus me-2"></i>Explore Markets
                         </a>
                     </div>
                     <?php else: ?>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="bg-light">
+                        <table class="table mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="border-0 ps-4">Varlık</th>
-                                    <th class="border-0 text-end">Miktar</th>
-                                    <th class="border-0 text-end">Ort. Fiyat</th>
-                                    <th class="border-0 text-end">Güncel Fiyat</th>
-                                    <th class="border-0 text-end">Toplam Değer</th>
-                                    <th class="border-0 text-end">Kar/Zarar</th>
-                                    <th class="border-0 text-center pe-4">İşlem</th>
+                                    <th class="border-0 ps-4 py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Asset</th>
+                                    <th class="border-0 text-end py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Holdings</th>
+                                    <th class="border-0 text-end py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Avg Price</th>
+                                    <th class="border-0 text-end py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Market Price</th>
+                                    <th class="border-0 text-end py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Market Value</th>
+                                    <th class="border-0 text-end py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">P&L</th>
+                                    <th class="border-0 text-center pe-4 py-3 fw-semibold text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,41 +349,44 @@ include 'includes/header.php';
                                 $profit_loss = $current_value - $holding['total_invested'];
                                 $profit_loss_percent = $holding['total_invested'] > 0 ? ($profit_loss / $holding['total_invested']) * 100 : 0;
                                 ?>
-                                <tr>
-                                    <td class="ps-4 py-3">
+                                <tr class="border-bottom" style="border-color: rgba(0,0,0,0.05) !important;">
+                                    <td class="ps-4 py-4">
                                         <div class="d-flex align-items-center">
                                             <?php if ($holding['logo_url']): ?>
                                             <img src="<?php echo $holding['logo_url']; ?>" 
                                                  alt="<?php echo $holding['name']; ?>" 
-                                                 class="me-3 rounded-circle" 
-                                                 width="32" height="32"
-                                                 onerror="this.outerHTML='<div class=&quot;bg-primary rounded-circle d-flex align-items-center justify-content-center me-3&quot; style=&quot;width: 32px; height: 32px;&quot;><i class=&quot;fas fa-coins text-white&quot;></i></div>';">
+                                                 class="asset-logo me-3"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <div class="bg-gradient text-white rounded-circle d-none align-items-center justify-content-center me-3" 
+                                                 style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                <i class="fas fa-coins"></i>
+                                            </div>
                                             <?php else: ?>
-                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                 style="width: 32px; height: 32px;">
-                                                <i class="fas fa-coins text-white"></i>
+                                            <div class="bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                 style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                <i class="fas fa-coins"></i>
                                             </div>
                                             <?php endif; ?>
-                                            <div>
-                                                <div class="fw-bold"><?php echo $holding['symbol']; ?></div>
-                                                <small class="text-muted"><?php echo $holding['name']; ?></small>
+                                            <div class="asset-info">
+                                                <h6 class="mb-1"><?php echo $holding['symbol']; ?></h6>
+                                                <small><?php echo substr($holding['name'], 0, 30) . (strlen($holding['name']) > 30 ? '...' : ''); ?></small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-end py-3">
-                                        <div class="fw-bold"><?php echo formatTurkishNumber($holding['quantity'], 6); ?></div>
-                                        <small class="text-muted">adet</small>
+                                    <td class="text-end py-4">
+                                        <div class="fw-bold text-dark"><?php echo formatTurkishNumber($holding['quantity'], 6); ?></div>
+                                        <small class="text-muted">shares</small>
                                     </td>
-                                    <td class="text-end py-3">
-                                        <div><?php echo formatPrice($holding['avg_price']); ?></div>
+                                    <td class="text-end py-4">
+                                        <div class="fw-semibold"><?php echo formatPrice($holding['avg_price']); ?></div>
                                         <small class="text-muted">USD</small>
                                     </td>
-                                    <td class="text-end py-3">
-                                        <div><?php echo formatPrice($holding['current_price']); ?></div>
+                                    <td class="text-end py-4">
+                                        <div class="fw-semibold"><?php echo formatPrice($holding['current_price']); ?></div>
                                         <small class="text-muted">USD</small>
                                     </td>
-                                    <td class="text-end py-3">
-                                        <div class="fw-bold">
+                                    <td class="text-end py-4">
+                                        <div class="fw-bold text-dark">
                                             <?php 
                                             if ($trading_currency == 1) {
                                                 echo formatTurkishNumber(convertUSDToTL($current_value), 2) . ' TL';
@@ -220,32 +396,32 @@ include 'includes/header.php';
                                             ?>
                                         </div>
                                         <small class="text-muted">
-                                            <?php 
+                                            Cost: <?php 
                                             $invested_display = $trading_currency == 1 ? convertUSDToTL($holding['total_invested']) : $holding['total_invested'];
-                                            echo 'Yatırım: ' . formatTurkishNumber($invested_display, 2) . ' ' . $currency_symbol;
+                                            echo formatTurkishNumber($invested_display, 2) . ' ' . $currency_symbol;
                                             ?>
                                         </small>
                                     </td>
-                                    <td class="text-end py-3">
-                                        <div class="fw-bold <?php echo $profit_loss >= 0 ? 'text-success' : 'text-danger'; ?>">
+                                    <td class="text-end py-4">
+                                        <div class="fw-bold <?php echo $profit_loss >= 0 ? 'performance-positive' : 'performance-negative'; ?>">
                                             <?php 
                                             $profit_loss_display = $trading_currency == 1 ? convertUSDToTL($profit_loss) : $profit_loss;
                                             echo ($profit_loss >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_display, 2) . ' ' . $currency_symbol;
                                             ?>
                                         </div>
-                                        <small class="<?php echo $profit_loss_percent >= 0 ? 'text-success' : 'text-danger'; ?>">
+                                        <small class="<?php echo $profit_loss_percent >= 0 ? 'performance-positive' : 'performance-negative'; ?>">
                                             <?php echo ($profit_loss_percent >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_percent, 2); ?>%
                                         </small>
                                     </td>
-                                    <td class="text-center py-3 pe-4">
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    <td class="text-center py-4 pe-4">
+                                        <div class="action-buttons">
+                                            <button type="button" class="btn btn-sm btn-outline-danger me-1" 
                                                     onclick="showSellModal('<?php echo $holding['symbol']; ?>', '<?php echo $holding['name']; ?>', <?php echo $holding['quantity']; ?>, <?php echo $holding['current_price']; ?>)">
-                                                <i class="fas fa-minus me-1"></i>Sat
+                                                <i class="fas fa-arrow-down me-1"></i>Sell
                                             </button>
                                             <a href="markets.php?search=<?php echo urlencode($holding['symbol']); ?>" 
-                                               class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-chart-line me-1"></i>Grafik
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-chart-line me-1"></i>Chart
                                             </a>
                                         </div>
                                     </td>
