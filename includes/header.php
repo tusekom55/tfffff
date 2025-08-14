@@ -154,44 +154,20 @@ if (!in_array($current_page, $public_pages)) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="markets.php">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'markets.php' ? 'active' : ''; ?>" href="markets.php">
                             <i class="fas fa-chart-line me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Piyasalar' : 'Markets'; ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="portfolio.php">
+                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'portfolio.php' ? 'active' : ''; ?>" href="portfolio.php">
                             <i class="fas fa-chart-pie me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Portföy' : 'Portfolio'; ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="wallet.php">
-                            <i class="fas fa-wallet me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Cüzdan' : 'Wallet'; ?>
-                        </a>
-                    </li>
-                    <?php if (isLoggedIn()): ?>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'trading.php' ? 'active' : ''; ?>" href="trading.php">
-                            <i class="fas fa-exchange-alt me-1"></i><?php echo t('trading'); ?>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'wallet.php' ? 'active' : ''; ?>" href="wallet.php">
-                            <i class="fas fa-wallet me-1"></i><?php echo t('wallet'); ?>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'profile.php' ? 'active' : ''; ?>" href="profile.php">
-                            <i class="fas fa-user me-1"></i><?php echo t('profile'); ?>
+                            <i class="fas fa-user me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Profil' : 'Profile'; ?>
                         </a>
                     </li>
-                    <?php if (isAdmin()): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin/">
-                            <i class="fas fa-cog me-1"></i><?php echo t('admin'); ?>
-                        </a>
-                    </li>
-                    <?php endif; ?>
-                    <?php endif; ?>
                 </ul>
                 
                 <div class="d-flex align-items-center">
