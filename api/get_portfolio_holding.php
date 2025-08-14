@@ -9,7 +9,18 @@ try {
         @session_start();
     }
     
-    // Step 2: Include functions with error check
+    // Step 2: Include config files first - API'dan bakınca path farklı
+    if (!class_exists('Database')) {
+        require_once '../config/database.php';
+    }
+    if (!defined('FMP_API_KEY')) {
+        require_once '../config/api_keys.php';
+    }
+    if (!function_exists('t')) {
+        require_once '../config/languages.php';
+    }
+    
+    // Step 3: Include functions after config files
     if (!function_exists('isLoggedIn')) {
         require_once '../includes/functions.php';
     }
