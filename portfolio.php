@@ -521,35 +521,38 @@ function showSellModal(symbol, name, quantity, price) {
     currentSellPrice = price;
     maxQuantity = quantity;
     
-    // Set logo for modal - SADECE ORJİNAL LOGO KULLAN
+    // Set logo for modal - ORJİNAL LOGO KULLAN
     const logoImg = document.getElementById('sellAssetLogo');
     const logoFallback = document.getElementById('sellAssetLogoFallback');
     
-    // Find logo URL from page (from portfolio table) - SADECE ORJINAL LOGO
-    const portfolioRow = document.querySelector(`[onclick*="${symbol}"]`);
+    // Portfolio tablosundan logo URL'ini al
+    const portfolioRows = document.querySelectorAll('table tbody tr');
     let logoUrl = '';
     
-    if (portfolioRow) {
-        const logoElement = portfolioRow.closest('tr').querySelector('img[src*="logo_url"]');
-        if (logoElement && logoElement.src && logoElement.src.includes('logo_url')) {
-            logoUrl = logoElement.src;
+    portfolioRows.forEach(row => {
+        const symbolCell = row.querySelector('.fw-bold');
+        if (symbolCell && symbolCell.textContent.trim() === symbol) {
+            const logoElement = row.querySelector('img');
+            if (logoElement && logoElement.src && !logoElement.src.includes('outerHTML')) {
+                logoUrl = logoElement.src;
+            }
         }
-    }
+    });
     
-    // Eğer orjinal logo bulunamazsa, direkt fallback kullan
-    if (logoUrl && logoUrl !== '' && !logoUrl.includes('undefined') && !logoUrl.includes('null')) {
+    // Logo varsa göster, yoksa fallback
+    if (logoUrl && logoUrl !== '') {
         logoImg.src = logoUrl;
         logoImg.alt = name;
         logoImg.style.display = 'block';
         logoFallback.style.display = 'none';
         
-        // Handle logo error - direkt fallback'e geç
+        // Logo yüklenemezse fallback'e geç
         logoImg.onerror = function() {
             logoImg.style.display = 'none';
             logoFallback.style.display = 'flex';
         };
     } else {
-        // Orjinal logo yoksa direkt fallback kullan
+        // Logo bulunamazsa fallback kullan
         logoImg.style.display = 'none';
         logoFallback.style.display = 'flex';
     }
