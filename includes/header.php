@@ -154,13 +154,18 @@ if (!in_array($current_page, $public_pages)) {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>" href="index.php">
-                            <i class="fas fa-home me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Ana Sayfa' : 'Home'; ?>
+                        <a class="nav-link" href="markets.php">
+                            <i class="fas fa-chart-line me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Piyasalar' : 'Markets'; ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'markets.php' ? 'active' : ''; ?>" href="markets.php">
-                            <i class="fas fa-chart-bar me-1"></i><?php echo t('markets'); ?>
+                        <a class="nav-link" href="portfolio.php">
+                            <i class="fas fa-chart-pie me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Portföy' : 'Portfolio'; ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="wallet.php">
+                            <i class="fas fa-wallet me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Cüzdan' : 'Wallet'; ?>
                         </a>
                     </li>
                     <?php if (isLoggedIn()): ?>

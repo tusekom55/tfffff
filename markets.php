@@ -906,56 +906,7 @@ foreach($_SESSION as $session_key => $session_value) {
     }
 }
 
-/* Simple Sticky Categories Navigation */
-.categories-sticky {
-    position: fixed !important;
-    top: 76px !important; /* Below navbar */
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 1020 !important;
-    background: #fff !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-    border-bottom: 1px solid #e9ecef !important;
-    transition: all 0.3s ease !important;
-    padding: 20px 0 !important;
-}
-
-.categories-sticky .container {
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-}
-
-.categories-sticky .category-card {
-    transform: scale(0.9) !important;
-    margin-bottom: 0 !important;
-}
-
-.categories-sticky h5 {
-    display: none !important;
-}
-
-.categories-sticky .row {
-    margin-bottom: 0 !important;
-}
-
-/* Mobile sticky categories */
-.mobile-category-tabs.sticky {
-    position: fixed !important;
-    top: 76px !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 1020 !important;
-    margin-bottom: 0 !important;
-}
-
-/* Sticky offset compensation */
-.sticky-offset {
-    margin-top: 120px;
-}
-
-.mobile-sticky-offset {
-    margin-top: 80px;
-}
+/* No sticky functionality - categories stay in normal position */
 
 @media (max-width: 768px) {
     /* Hide desktop categories, show mobile tabs */
@@ -1478,6 +1429,9 @@ function openTradeModal(button) {
     // Configure modal based on type
     configureModalForType(type, action);
     
+    // Load portfolio holding for this symbol (for sell modal)
+    loadPortfolioHolding(symbol, price);
+    
     // Update TradingView widget for both desktop and mobile
     updateTradingViewWidget(symbol);
     updateMobileTradingViewWidget(symbol);
@@ -1488,6 +1442,124 @@ function openTradeModal(button) {
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('tradeModal'));
     modal.show();
+}
+
+// Load portfolio holding for symbol
+function loadPortfolioHolding(symbol, currentPrice) {
+    <?php if (isLoggedIn()): ?>
+    // For logged-in users, fetch portfolio data
+    fetch('api/get_portfolio_holding.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            symbol: symbol
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.holding) {
+            showPortfolioHolding(data.holding, currentPrice);
+        } else {
+            hidePortfolioHolding();
+        }
+    })
+    .catch(error => {
+        console.error('Error loading portfolio holding:', error);
+        hidePortfolioHolding();
+    });
+    <?php else: ?>
+    hidePortfolioHolding();
+    <?php endif; ?>
+}
+
+// Show portfolio holding in sell modal
+function showPortfolioHolding(holding, currentPrice) {
+    const portfolioDiv = document.getElementById('portfolioHolding');
+    const quickButtons = document.getElementById('quickSellButtons');
+    
+    if (!portfolioDiv) return;
+    
+    // Calculate current value and P&L
+    const currentValue = holding.quantity * currentPrice;
+    const profitLoss = currentValue - holding.total_invested;
+    const profitLossPercent = holding.total_invested > 0 ? (profitLoss / holding.total_invested) * 100 : 0;
+    
+    // Update display elements
+    document.getElementById('holdingQuantity').textContent = formatTurkishNumber(holding.quantity, 6);
+    document.getElementById('holdingValue').textContent = '$' + formatTurkishNumber(currentValue, 2);
+    document.getElementById('holdingAvgPrice').textContent = '$' + formatTurkishNumber(holding.avg_price, 4);
+    
+    const pnlElement = document.getElementById('holdingPnL');
+    pnlElement.textContent = (profitLoss >= 0 ? '+' : '') + '$' + formatTurkishNumber(Math.abs(profitLoss), 2);
+    pnlElement.className = profitLoss >= 0 ? 'text-success' : 'text-danger';
+    
+    // Store holding data for quick sell buttons
+    window.currentHolding = holding;
+    window.currentPrice = currentPrice;
+    
+    // Show portfolio section and quick buttons
+    portfolioDiv.style.display = 'block';
+    if (quickButtons) quickButtons.style.display = 'block';
+}
+
+// Hide portfolio holding display
+function hidePortfolioHolding() {
+    const portfolioDiv = document.getElementById('portfolioHolding');
+    const quickButtons = document.getElementById('quickSellButtons');
+    
+    if (portfolioDiv) portfolioDiv.style.display = 'none';
+    if (quickButtons) quickButtons.style.display = 'none';
+    
+    window.currentHolding = null;
+    window.currentPrice = null;
+}
+
+// Set sell percentage based on portfolio holding
+function setPortfolioSellPercentage(percentage) {
+    if (!window.currentHolding || !window.currentPrice) return;
+    
+    const holding = window.currentHolding;
+    const price = window.currentPrice;
+    
+    // Calculate USD amount based on percentage of holding
+    const sellQuantity = holding.quantity * (percentage / 100);
+    const usdAmount = sellQuantity * price;
+    
+    // Set the USD amount in sell input
+    const sellInput = document.getElementById('usd_amount_sell');
+    if (sellInput) {
+        sellInput.value = usdAmount.toFixed(2);
+        
+        // Trigger calculation
+        calculateSimpleTradeSell();
+    }
+}
+
+// Calculate simple trade for sell
+function calculateSimpleTradeSell() {
+    const usdAmount = parseFloat(document.getElementById('usd_amount_sell').value) || 0;
+    const priceUSD = parseFloat(document.getElementById('modalPrice').textContent.replace(',', '.'));
+    
+    if (usdAmount <= 0) {
+        return;
+    }
+    
+    // Check if user has enough in portfolio
+    if (window.currentHolding) {
+        const maxValue = window.currentHolding.quantity * priceUSD;
+        if (usdAmount > maxValue) {
+            // Show warning or limit to max value
+            const sellInput = document.getElementById('usd_amount_sell');
+            sellInput.value = maxValue.toFixed(2);
+        }
+    }
+    
+    // Update calculations here (similar to buy calculations)
+    const fee = usdAmount * 0.001; // 0.1% fee
+    
+    // You can add more calculation display here
 }
 
 // Copy trading forms to mobile tab
@@ -2025,111 +2097,10 @@ function testModal() {
     modal.show();
 }
 
-// Simple Sticky Categories Navigation System
-let lastScrollTop = 0;
-let categoriesOriginalPosition = null;
-let isSticky = false;
-
+// No sticky functionality - categories stay in normal position
 function initStickyCategories() {
-    const desktopCategories = document.querySelector('.desktop-categories');
-    const mobileCategories = document.querySelector('.mobile-category-tabs');
-    
-    if (desktopCategories) {
-        categoriesOriginalPosition = desktopCategories.offsetTop;
-    }
-    
-    function handleScroll() {
-        const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-        const navbarHeight = 76;
-        
-        // Desktop sticky behavior
-        if (window.innerWidth >= 769 && desktopCategories) {
-            const stickThreshold = categoriesOriginalPosition - navbarHeight - 20;
-            const unstickThreshold = categoriesOriginalPosition - navbarHeight - 100;
-            
-            if (currentScroll >= stickThreshold && !isSticky) {
-                // Make sticky
-                desktopCategories.classList.add('categories-sticky');
-                isSticky = true;
-                
-                // Add offset to next element
-                const nextElement = desktopCategories.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.add('sticky-offset');
-                }
-                
-            } else if (currentScroll <= unstickThreshold && isSticky) {
-                // Remove sticky
-                desktopCategories.classList.remove('categories-sticky');
-                isSticky = false;
-                
-                // Remove offset
-                const nextElement = desktopCategories.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.remove('sticky-offset');
-                }
-            }
-        }
-        
-        // Mobile sticky behavior
-        if (window.innerWidth < 769 && mobileCategories) {
-            const categoriesPosition = mobileCategories.offsetTop;
-            const stickThreshold = categoriesPosition - navbarHeight;
-            const unstickThreshold = categoriesPosition - navbarHeight - 80;
-            
-            if (currentScroll >= stickThreshold && !mobileCategories.classList.contains('sticky')) {
-                mobileCategories.classList.add('sticky');
-                
-                // Add offset to content
-                const nextElement = mobileCategories.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.add('mobile-sticky-offset');
-                }
-                
-            } else if (currentScroll <= unstickThreshold && mobileCategories.classList.contains('sticky')) {
-                mobileCategories.classList.remove('sticky');
-                
-                // Remove offset
-                const nextElement = mobileCategories.nextElementSibling;
-                if (nextElement) {
-                    nextElement.classList.remove('mobile-sticky-offset');
-                }
-            }
-        }
-        
-        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-    }
-    
-    // Throttled scroll event
-    let ticking = false;
-    window.addEventListener('scroll', function() {
-        if (!ticking) {
-            requestAnimationFrame(function() {
-                handleScroll();
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-    
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        // Reset sticky state on resize
-        if (desktopCategories) {
-            desktopCategories.classList.remove('categories-sticky');
-            categoriesOriginalPosition = desktopCategories.offsetTop;
-        }
-        if (mobileCategories) {
-            mobileCategories.classList.remove('sticky');
-        }
-        isSticky = false;
-        
-        // Remove all offsets
-        const elements = document.querySelectorAll('.sticky-offset, .mobile-sticky-offset');
-        elements.forEach(el => {
-            el.classList.remove('sticky-offset', 'mobile-sticky-offset');
-        });
-    });
+    // Removed sticky functionality
+    console.log('Sticky categories disabled');
 }
 
 // Add click event listener when page loads
@@ -2393,30 +2364,63 @@ function initMobileHeaderBalance() {
                                     <?php endif; ?>
                                 </div>
                                 
-                                <!-- Sell/Short Form -->
-                                <div class="tab-pane fade" id="sell-pane" role="tabpanel">
-                                    <?php if (isLoggedIn()): ?>
-                                    <form id="sellForm" method="POST" action="">
-                                        <input type="hidden" name="modal_action" value="sell">
-                                        <input type="hidden" name="symbol" id="sellSymbol" value="">
-                                        <input type="hidden" name="trade_type" id="sellTradeType" value="">
-                                        <div class="mb-3">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <label class="form-label mb-0">Miktar</label>
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <input type="radio" class="btn-check" name="amountTypeSell" id="amountLotSell" value="lot">
-                                                    <label class="btn btn-outline-primary" for="amountLotSell">Lot</label>
-                                                    
-                                                    <input type="radio" class="btn-check" name="amountTypeSell" id="amountUSDSell" value="usd" checked>
-                                                    <label class="btn btn-outline-primary" for="amountUSDSell">USD</label>
-                                                </div>
+                        <!-- Sell/Short Form -->
+                        <div class="tab-pane fade" id="sell-pane" role="tabpanel">
+                            <?php if (isLoggedIn()): ?>
+                            
+                            <!-- Portfolio Holdings for this symbol -->
+                            <div class="mb-3" id="portfolioHolding" style="display: none;">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body p-3">
+                                        <h6 class="card-title mb-2">💼 Portföyünüzde</h6>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="fw-bold" id="holdingQuantity">0.000000</div>
+                                                <small class="text-muted">adet</small>
                                             </div>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control" id="amountSell" step="0.01" min="0.01" 
-                                                       placeholder="0.00" oninput="calculateTradeSell()">
-                                                <span class="input-group-text" id="amountUnitSell">Lot</span>
+                                            <div class="text-end">
+                                                <div class="fw-bold" id="holdingValue">$0.00</div>
+                                                <small class="text-muted">güncel değer</small>
                                             </div>
                                         </div>
+                                        <div class="mt-2">
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">Ortalama Fiyat:</small>
+                                                <small id="holdingAvgPrice">$0.00</small>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <small class="text-muted">Kar/Zarar:</small>
+                                                <small id="holdingPnL" class="text-success">+$0.00</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form id="sellForm" method="POST" action="">
+                                <input type="hidden" name="trade_action" value="sell">
+                                <input type="hidden" name="symbol" id="sellSymbol" value="">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">USD Miktar</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="usd_amount_sell" name="usd_amount" step="0.01" min="0.01" 
+                                               placeholder="10.00" oninput="calculateSimpleTradeSell()" required>
+                                        <span class="input-group-text">USD</span>
+                                    </div>
+                                    <small class="text-muted">Satmak istediğiniz USD tutarı</small>
+                                </div>
+                                
+                                <!-- Quick Amount Buttons for Portfolio -->
+                                <div class="mb-3" id="quickSellButtons" style="display: none;">
+                                    <small class="text-muted d-block mb-2">Hızlı Seçim:</small>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="setPortfolioSellPercentage(25)">%25</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="setPortfolioSellPercentage(50)">%50</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="setPortfolioSellPercentage(75)">%75</button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm flex-fill" onclick="setPortfolioSellPercentage(100)">Tümü</button>
+                                    </div>
+                                </div>
                                         
                                         <div class="mb-3 leverage-control">
                                             <label class="form-label">Kaldıraç <span class="badge bg-primary">1x</span></label>

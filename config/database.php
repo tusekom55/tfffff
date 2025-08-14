@@ -119,6 +119,21 @@ function createTables() {
     )";
     $db->exec($query);
     
+    // User portfolio table
+    $query = "CREATE TABLE IF NOT EXISTS user_portfolio (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        symbol VARCHAR(20) NOT NULL,
+        quantity DECIMAL(15,8) NOT NULL DEFAULT 0.00000000,
+        avg_price DECIMAL(15,8) NOT NULL DEFAULT 0.00000000,
+        total_invested DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE KEY unique_user_symbol (user_id, symbol)
+    )";
+    $db->exec($query);
+    
     // System parameters table
     $query = "CREATE TABLE IF NOT EXISTS system_parameters (
         parameter_name VARCHAR(50) PRIMARY KEY,

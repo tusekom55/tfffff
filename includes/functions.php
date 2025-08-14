@@ -1400,86 +1400,219 @@ function formatTurkishNumber($number, $decimals = 2) {
 // SIMPLE CLEAN TRADING SYSTEM
 // ===============================
 
+// ===============================
+// PORTFOLIO MANAGEMENT FUNCTIONS
+// ===============================
+
 /**
- * Execute simple trade based on trading currency parameter
+ * Get user portfolio
+ */
+function getUserPortfolio($user_id) {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    $query = "SELECT p.*, m.name, m.price as current_price, m.change_24h, m.logo_url 
+              FROM user_portfolio p 
+              LEFT JOIN markets m ON p.symbol = m.symbol 
+              WHERE p.user_id = ? AND p.quantity > 0
+              ORDER BY p.total_invested DESC";
+    $stmt = $db->prepare($query);
+    $stmt->execute([$user_id]);
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Get portfolio value
+ */
+function getPortfolioValue($user_id) {
+    $portfolio = getUserPortfolio($user_id);
+    $total_value = 0;
+    $total_invested = 0;
+    
+    foreach ($portfolio as $holding) {
+        $current_value = $holding['quantity'] * $holding['current_price'];
+        $total_value += $current_value;
+        $total_invested += $holding['total_invested'];
+    }
+    
+    return [
+        'current_value' => $total_value,
+        'total_invested' => $total_invested,
+        'profit_loss' => $total_value - $total_invested,
+        'profit_loss_percentage' => $total_invested > 0 ? (($total_value - $total_invested) / $total_invested) * 100 : 0
+    ];
+}
+
+/**
+ * Update user portfolio
+ */
+function updateUserPortfolio($user_id, $symbol, $quantity, $price, $action) {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    if ($action == 'buy') {
+        // Check if user already has this asset
+        $query = "SELECT * FROM user_portfolio WHERE user_id = ? AND symbol = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$user_id, $symbol]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existing) {
+            // Update existing holding - calculate new average price
+            $old_quantity = $existing['quantity'];
+            $old_invested = $existing['total_invested'];
+            $new_quantity = $old_quantity + $quantity;
+            $new_invested = $old_invested + ($quantity * $price);
+            $new_avg_price = $new_invested / $new_quantity;
+            
+            $query = "UPDATE user_portfolio SET 
+                      quantity = ?, 
+                      avg_price = ?, 
+                      total_invested = ?,
+                      updated_at = CURRENT_TIMESTAMP 
+                      WHERE user_id = ? AND symbol = ?";
+            $stmt = $db->prepare($query);
+            return $stmt->execute([$new_quantity, $new_avg_price, $new_invested, $user_id, $symbol]);
+        } else {
+            // Create new holding
+            $query = "INSERT INTO user_portfolio (user_id, symbol, quantity, avg_price, total_invested) 
+                      VALUES (?, ?, ?, ?, ?)";
+            $stmt = $db->prepare($query);
+            return $stmt->execute([$user_id, $symbol, $quantity, $price, $quantity * $price]);
+        }
+    } else { // sell
+        // Reduce quantity
+        $query = "SELECT * FROM user_portfolio WHERE user_id = ? AND symbol = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$user_id, $symbol]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existing && $existing['quantity'] >= $quantity) {
+            $new_quantity = $existing['quantity'] - $quantity;
+            
+            if ($new_quantity <= 0) {
+                // Remove holding completely
+                $query = "DELETE FROM user_portfolio WHERE user_id = ? AND symbol = ?";
+                $stmt = $db->prepare($query);
+                return $stmt->execute([$user_id, $symbol]);
+            } else {
+                // Update quantity (keep same avg price)
+                $new_invested = $new_quantity * $existing['avg_price'];
+                $query = "UPDATE user_portfolio SET 
+                          quantity = ?, 
+                          total_invested = ?,
+                          updated_at = CURRENT_TIMESTAMP 
+                          WHERE user_id = ? AND symbol = ?";
+                $stmt = $db->prepare($query);
+                return $stmt->execute([$new_quantity, $new_invested, $user_id, $symbol]);
+            }
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Get portfolio holding for specific symbol
+ */
+function getPortfolioHolding($user_id, $symbol) {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    $query = "SELECT * FROM user_portfolio WHERE user_id = ? AND symbol = ?";
+    $stmt = $db->prepare($query);
+    $stmt->execute([$user_id, $symbol]);
+    
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Execute simple trade with portfolio update
  */
 function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price) {
-    echo "<script>console.log('executeSimpleTrade START: user_id=$user_id, symbol=$symbol, action=$action, usd_amount=$usd_amount, usd_price=$usd_price');</script>";
-    
     $database = new Database();
     $db = $database->getConnection();
     
     if (!$db) {
-        echo "<script>console.log('executeSimpleTrade FAIL: Database connection failed');</script>";
         return false;
     }
     
     try {
-        $transaction_result = $db->beginTransaction();
-        echo "<script>console.log('executeSimpleTrade: beginTransaction result = " . ($transaction_result ? 'SUCCESS' : 'FAILED') . "');</script>";
+        $db->beginTransaction();
+        
+        // Calculate quantity
+        $quantity = $usd_amount / $usd_price;
         
         // Get trading currency setting (1=TL, 2=USD)
         $trading_currency = getTradingCurrency();
-        echo "<script>console.log('executeSimpleTrade: trading_currency = $trading_currency');</script>";
         
         if ($trading_currency == 1) { // TL Mode
-            echo "<script>console.log('executeSimpleTrade: TL Mode');</script>";
-            
             // Convert USD to TL
             $usd_to_tl_rate = getUSDTRYRate();
             $tl_amount = $usd_amount * $usd_to_tl_rate;
             $fee_tl = $tl_amount * 0.001; // 0.1% fee
             $total_tl = $tl_amount + $fee_tl;
             
-            echo "<script>console.log('executeSimpleTrade TL: rate=$usd_to_tl_rate, tl_amount=$tl_amount, fee_tl=$fee_tl, total_tl=$total_tl');</script>";
-            
             if ($action == 'buy') {
-                echo "<script>console.log('executeSimpleTrade: BUY action');</script>";
-                
                 // Check TL balance
                 $tl_balance = getUserBalance($user_id, 'tl');
-                echo "<script>console.log('executeSimpleTrade BUY: tl_balance=$tl_balance, required=$total_tl');</script>";
                 
                 if ($tl_balance < $total_tl) {
-                    echo "<script>console.log('executeSimpleTrade BUY FAIL: Insufficient balance');</script>";
                     $db->rollback();
                     return false;
                 }
                 
                 // Deduct TL from user balance
                 $balance_update = updateUserBalance($user_id, 'tl', $total_tl, 'subtract');
-                echo "<script>console.log('executeSimpleTrade BUY: balance_update result = " . ($balance_update ? 'SUCCESS' : 'FAILED') . "');</script>";
-                
                 if (!$balance_update) {
-                    echo "<script>console.log('executeSimpleTrade BUY FAIL: Balance update failed');</script>";
                     $db->rollback();
                     return false;
                 }
                 
-                // Record transaction in TL - without currency column for compatibility
+                // Update portfolio - add to holdings
+                $portfolio_update = updateUserPortfolio($user_id, $symbol, $quantity, $usd_price, 'buy');
+                if (!$portfolio_update) {
+                    $db->rollback();
+                    return false;
+                }
+                
+                // Record transaction
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $usd_amount, $usd_price, $tl_amount, $fee_tl]);
-                echo "<script>console.log('executeSimpleTrade BUY: transaction_insert result = " . ($transaction_insert ? 'SUCCESS' : 'FAILED') . "');</script>";
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $tl_amount, $fee_tl]);
                 
                 if (!$transaction_insert) {
-                    echo "<script>console.log('executeSimpleTrade BUY FAIL: Transaction insert failed');</script>";
                     $db->rollback();
                     return false;
                 }
                 
             } else { // sell
-                // For sell operations, we assume user has the asset
-                // Simplified: just add TL to balance (minus fee)
+                // Check if user has enough in portfolio
+                $holding = getPortfolioHolding($user_id, $symbol);
+                if (!$holding || $holding['quantity'] < $quantity) {
+                    $db->rollback();
+                    return false;
+                }
+                
+                // Update portfolio - remove from holdings
+                $portfolio_update = updateUserPortfolio($user_id, $symbol, $quantity, $usd_price, 'sell');
+                if (!$portfolio_update) {
+                    $db->rollback();
+                    return false;
+                }
+                
+                // Add TL to balance (minus fee)
                 $balance_update = updateUserBalance($user_id, 'tl', $tl_amount - $fee_tl, 'add');
                 if (!$balance_update) {
                     $db->rollback();
                     return false;
                 }
                 
+                // Record transaction
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $usd_amount, $usd_price, $tl_amount, $fee_tl]);
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $tl_amount, $fee_tl]);
                 if (!$transaction_insert) {
                     $db->rollback();
                     return false;
@@ -1487,52 +1620,56 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
             }
             
         } else { // USD Mode
-            echo "<script>console.log('executeSimpleTrade: USD Mode');</script>";
             $fee_usd = $usd_amount * 0.001; // 0.1% fee
             $total_usd = $usd_amount + $fee_usd;
             
-            echo "<script>console.log('executeSimpleTrade USD: usd_amount=$usd_amount, fee_usd=$fee_usd, total_usd=$total_usd');</script>";
-            
             if ($action == 'buy') {
-                echo "<script>console.log('executeSimpleTrade: BUY action in USD mode');</script>";
-                
                 // Check USD balance
                 $usd_balance = getUserBalance($user_id, 'usd');
-                echo "<script>console.log('executeSimpleTrade USD BUY: usd_balance=$usd_balance, required=$total_usd');</script>";
                 
                 if ($usd_balance < $total_usd) {
-                    echo "<script>console.log('executeSimpleTrade USD BUY FAIL: Insufficient balance');</script>";
                     $db->rollback();
                     return false;
                 }
-                
-                echo "<script>console.log('executeSimpleTrade USD BUY: Balance sufficient, proceeding...');</script>";
                 
                 // Deduct USD from user balance
                 $balance_update = updateUserBalance($user_id, 'usd', $total_usd, 'subtract');
-                echo "<script>console.log('executeSimpleTrade USD BUY: balance_update result = " . ($balance_update ? 'SUCCESS' : 'FAILED') . "');</script>";
-                
                 if (!$balance_update) {
-                    echo "<script>console.log('executeSimpleTrade USD BUY FAIL: Balance update failed');</script>";
                     $db->rollback();
                     return false;
                 }
                 
-                // Record transaction in USD - without currency column for compatibility  
+                // Update portfolio - add to holdings
+                $portfolio_update = updateUserPortfolio($user_id, $symbol, $quantity, $usd_price, 'buy');
+                if (!$portfolio_update) {
+                    $db->rollback();
+                    return false;
+                }
+                
+                // Record transaction
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                echo "<script>console.log('executeSimpleTrade USD BUY: Executing SQL insert...');</script>";
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $usd_amount, $usd_price, $usd_amount, $fee_usd]);
-                echo "<script>console.log('executeSimpleTrade USD BUY: transaction_insert result = " . ($transaction_insert ? 'SUCCESS' : 'FAILED') . "');</script>";
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $usd_amount, $fee_usd]);
                 
                 if (!$transaction_insert) {
-                    echo "<script>console.log('executeSimpleTrade USD BUY FAIL: Transaction insert failed');</script>";
                     $db->rollback();
                     return false;
                 }
                 
             } else { // sell
-                echo "<script>console.log('executeSimpleTrade: SELL action in USD mode');</script>";
+                // Check if user has enough in portfolio
+                $holding = getPortfolioHolding($user_id, $symbol);
+                if (!$holding || $holding['quantity'] < $quantity) {
+                    $db->rollback();
+                    return false;
+                }
+                
+                // Update portfolio - remove from holdings
+                $portfolio_update = updateUserPortfolio($user_id, $symbol, $quantity, $usd_price, 'sell');
+                if (!$portfolio_update) {
+                    $db->rollback();
+                    return false;
+                }
                 
                 // Add USD to balance (minus fee)
                 $balance_update = updateUserBalance($user_id, 'usd', $usd_amount - $fee_usd, 'add');
@@ -1541,9 +1678,10 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
                     return false;
                 }
                 
+                // Record transaction
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $usd_amount, $usd_price, $usd_amount, $fee_usd]);
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $usd_amount, $fee_usd]);
                 if (!$transaction_insert) {
                     $db->rollback();
                     return false;
@@ -1551,14 +1689,10 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
             }
         }
         
-        echo "<script>console.log('executeSimpleTrade: About to commit transaction...');</script>";
-        $commit_result = $db->commit();
-        echo "<script>console.log('executeSimpleTrade: commit result = " . ($commit_result ? 'SUCCESS' : 'FAILED') . "');</script>";
-        echo "<script>console.log('executeSimpleTrade: RETURNING " . ($commit_result ? 'TRUE' : 'FALSE') . "');</script>";
-        return $commit_result;
+        $db->commit();
+        return true;
         
     } catch (Exception $e) {
-        echo "<script>console.log('executeSimpleTrade: Exception caught - " . addslashes($e->getMessage()) . "');</script>";
         $db->rollback();
         return false;
     }
