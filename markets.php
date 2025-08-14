@@ -917,11 +917,19 @@ foreach($_SESSION as $session_key => $session_value) {
     .mobile-category-tabs {
         display: block !important;
         background: white;
-        z-index: 1020;
+        z-index: 10001 !important;
         padding: 1rem 0;
         border-bottom: 1px solid #e9ecef;
         margin-bottom: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .mobile-category-tabs.sticky-top {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 10001 !important;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
     .category-tabs-container {
