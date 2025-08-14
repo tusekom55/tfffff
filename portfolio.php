@@ -350,10 +350,23 @@ include 'includes/header.php';
                                     </td>
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
+                                            <?php 
+                                            // Get logo from markets table for this symbol
+                                            $market_data = getSingleMarket($transaction['symbol']);
+                                            $logo_url = $market_data['logo_url'] ?? '';
+                                            ?>
+                                            <?php if ($logo_url): ?>
+                                            <img src="<?php echo $logo_url; ?>" 
+                                                 alt="<?php echo $transaction['symbol']; ?>" 
+                                                 class="me-2 rounded-circle" 
+                                                 width="24" height="24"
+                                                 onerror="this.outerHTML='<div class=&quot;bg-primary rounded-circle d-flex align-items-center justify-content-center me-2&quot; style=&quot;width: 24px; height: 24px;&quot;><i class=&quot;fas fa-coins text-white&quot; style=&quot;font-size: 10px;&quot;></i></div>';">
+                                            <?php else: ?>
                                             <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" 
                                                  style="width: 24px; height: 24px;">
                                                 <i class="fas fa-coins text-white" style="font-size: 10px;"></i>
                                             </div>
+                                            <?php endif; ?>
                                             <div>
                                                 <div class="fw-bold"><?php echo $transaction['symbol']; ?></div>
                                                 <small class="text-muted"><?php echo $transaction['market_name'] ?: $transaction['symbol']; ?></small>
@@ -428,6 +441,13 @@ include 'includes/header.php';
                 
                 <div class="modal-body">
                     <div class="text-center mb-3">
+                        <div class="mb-2">
+                            <img id="sellAssetLogo" src="" alt="" class="rounded-circle" width="48" height="48" style="display: none;">
+                            <div id="sellAssetLogoFallback" class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 48px; height: 48px; display: none;">
+                                <i class="fas fa-coins text-white"></i>
+                            </div>
+                        </div>
                         <h6 id="sellAssetName">Apple Inc.</h6>
                         <p class="text-muted mb-0">Güncel Fiyat: $<span id="sellCurrentPrice">175.50</span></p>
                     </div>
@@ -500,6 +520,37 @@ function showSellModal(symbol, name, quantity, price) {
     
     currentSellPrice = price;
     maxQuantity = quantity;
+    
+    // Set logo for modal
+    const logoImg = document.getElementById('sellAssetLogo');
+    const logoFallback = document.getElementById('sellAssetLogoFallback');
+    
+    // Find logo URL from page (from portfolio table)
+    const portfolioRow = document.querySelector(`[onclick*="${symbol}"]`);
+    let logoUrl = '';
+    
+    if (portfolioRow) {
+        const logoElement = portfolioRow.closest('tr').querySelector('img');
+        if (logoElement) {
+            logoUrl = logoElement.src;
+        }
+    }
+    
+    if (logoUrl && logoUrl !== '') {
+        logoImg.src = logoUrl;
+        logoImg.alt = name;
+        logoImg.style.display = 'block';
+        logoFallback.style.display = 'none';
+        
+        // Handle logo error
+        logoImg.onerror = function() {
+            logoImg.style.display = 'none';
+            logoFallback.style.display = 'flex';
+        };
+    } else {
+        logoImg.style.display = 'none';
+        logoFallback.style.display = 'flex';
+    }
     
     // Reset form
     document.getElementById('sellQuantity').value = '';
