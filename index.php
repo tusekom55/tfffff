@@ -374,6 +374,41 @@ $markets = getMarketData('us_stocks', 6);
             100% { transform: translateX(-100%); }
         }
         
+        /* Mobile Stock Ticker Optimization */
+        @media (max-width: 768px) {
+            .hero-stock-ticker {
+                height: 32px;
+                bottom: 10px;
+            }
+            
+            .stock-ticker-track {
+                gap: 1.5rem;
+                animation: stockTicker 35s linear infinite;
+            }
+            
+            .stock-ticker-item {
+                gap: 0.3rem;
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-stock-ticker {
+                height: 28px;
+                bottom: 5px;
+            }
+            
+            .stock-ticker-track {
+                gap: 1rem;
+                animation: stockTicker 40s linear infinite;
+            }
+            
+            .stock-ticker-item {
+                gap: 0.25rem;
+                font-size: 0.7rem;
+            }
+        }
+        
         /* Financial particles */
         .financial-particles {
             position: absolute;
