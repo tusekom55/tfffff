@@ -110,31 +110,31 @@ include 'includes/header.php';
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 col-6 mb-3">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded border border-success">
-                                <i class="fas fa-lira-sign fa-2x text-success mb-2"></i>
-                                <div class="h4 mb-1 text-success"><?php echo formatNumber($balance_tl); ?></div>
-                                <small class="text-success">Türk Lirası</small>
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="fas fa-lira-sign fa-2x text-primary mb-2"></i>
+                                <div class="h4 mb-1"><?php echo formatNumber($balance_tl); ?></div>
+                                <small class="text-muted">Türk Lirası</small>
                             </div>
                         </div>
                         <div class="col-md-3 col-6 mb-3">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded border border-success">
+                            <div class="text-center p-3 bg-light rounded">
                                 <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
-                                <div class="h4 mb-1 text-success"><?php echo formatNumber($balance_usd); ?></div>
-                                <small class="text-success">US Dollar</small>
+                                <div class="h4 mb-1"><?php echo formatNumber($balance_usd); ?></div>
+                                <small class="text-muted">US Dollar</small>
                             </div>
                         </div>
                         <div class="col-md-3 col-6 mb-3">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded border border-success">
-                                <i class="fab fa-bitcoin fa-2x text-success mb-2"></i>
-                                <div class="h4 mb-1 text-success"><?php echo formatPrice($balance_btc); ?></div>
-                                <small class="text-success">Bitcoin</small>
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="fab fa-bitcoin fa-2x text-warning mb-2"></i>
+                                <div class="h4 mb-1"><?php echo formatPrice($balance_btc); ?></div>
+                                <small class="text-muted">Bitcoin</small>
                             </div>
                         </div>
                         <div class="col-md-3 col-6 mb-3">
-                            <div class="text-center p-3 bg-success bg-opacity-10 rounded border border-success">
-                                <i class="fab fa-ethereum fa-2x text-success mb-2"></i>
-                                <div class="h4 mb-1 text-success"><?php echo formatPrice($balance_eth); ?></div>
-                                <small class="text-success">Ethereum</small>
+                            <div class="text-center p-3 bg-light rounded">
+                                <i class="fab fa-ethereum fa-2x text-info mb-2"></i>
+                                <div class="h4 mb-1"><?php echo formatPrice($balance_eth); ?></div>
+                                <small class="text-muted">Ethereum</small>
                             </div>
                         </div>
                     </div>
@@ -289,18 +289,18 @@ include 'includes/header.php';
                                 </div>
 
                                 <!-- Banka Bilgileri -->
-                                <div id="bankDetails" style="display: none;" class="method-details">
+                                <div id="bankDetails" style="display: none;">
                                     <div class="mb-3">
                                         <label class="form-label">Banka</label>
                                         <select class="form-select" name="bank_name">
                                             <option value="">Banka Seçiniz</option>
-                                            <option value="ziraat">Ziraat Bankası</option>
-                                            <option value="akbank">Akbank</option>
-                                            <option value="garanti">Garanti BBVA</option>
-                                            <option value="isbank">İş Bankası</option>
-                                            <option value="vakifbank">VakıfBank</option>
-                                            <option value="halkbank">Halkbank</option>
-                                            <option value="other">Diğer</option>
+                                            <option value="ziraat">🟢 Ziraat Bankası</option>
+                                            <option value="akbank">🔵 Akbank</option>
+                                            <option value="garanti">🟠 Garanti BBVA</option>
+                                            <option value="isbank">🔴 İş Bankası</option>
+                                            <option value="vakifbank">🟡 VakıfBank</option>
+                                            <option value="halkbank">⚫ Halkbank</option>
+                                            <option value="other">🏦 Diğer</option>
                                         </select>
                                     </div>
                                     <div class="mb-3">
@@ -311,23 +311,23 @@ include 'includes/header.php';
                                 </div>
 
                                 <!-- Papara Bilgileri -->
-                                <div id="paparaDetails" style="display: none;" class="method-details">
+                                <div id="paparaDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <label class="form-label">Papara Hesap No</label>
+                                        <label class="form-label">📱 Papara Hesap No</label>
                                         <input type="text" class="form-control" name="papara_info" 
                                                placeholder="1234567890">
                                     </div>
                                 </div>
 
                                 <!-- Kripto Bilgileri -->
-                                <div id="cryptoDetails" style="display: none;" class="method-details">
+                                <div id="cryptoDetails" style="display: none;">
                                     <div class="mb-3">
                                         <label class="form-label">Kripto Para</label>
                                         <select class="form-select" name="crypto_type">
                                             <option value="">Seçiniz</option>
-                                            <option value="bitcoin">Bitcoin (BTC)</option>
-                                            <option value="ethereum">Ethereum (ETH)</option>
-                                            <option value="usdt">Tether (USDT)</option>
+                                            <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                                            <option value="ethereum">⟠ Ethereum (ETH)</option>
+                                            <option value="usdt">₮ Tether (USDT)</option>
                                         </select>
                                     </div>
                                     <div class="mb-3">
