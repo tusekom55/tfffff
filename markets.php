@@ -841,6 +841,71 @@ foreach($_SESSION as $session_key => $session_value) {
 }
 
 /* Mobile Optimization Styles */
+/* Mobile Modal Responsive Styles */
+@media (max-width: 991.98px) {
+    #tradeModal .modal-dialog {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 !important;
+        max-height: 85vh !important;
+        border-radius: 16px 16px 0 0 !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.3s ease !important;
+    }
+    
+    #tradeModal.show .modal-dialog {
+        transform: translateY(0) !important;
+    }
+    
+    #tradeModal .modal-content {
+        border-radius: 16px 16px 0 0 !important;
+        height: 100%;
+        border: none;
+    }
+    
+    .mobile-tab-content {
+        height: calc(85vh - 120px);
+        overflow-y: auto;
+    }
+    
+    .mobile-chart-tabs .nav-link {
+        border-radius: 0;
+        border: none;
+        border-bottom: 3px solid transparent;
+        background: none;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-chart-tabs .nav-link.active {
+        background: none;
+        color: #007bff;
+        border-bottom-color: #007bff;
+    }
+    
+    .mobile-chart-tabs .nav-link:hover {
+        background: #f8f9fa;
+        color: #495057;
+    }
+    
+    .chart-container {
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #e9ecef;
+    }
+}
+
+@media (min-width: 992px) {
+    .mobile-chart-tabs {
+        display: none !important;
+    }
+}
+
 @media (max-width: 768px) {
     /* Hide desktop categories, show mobile tabs */
     .desktop-categories {
@@ -1362,12 +1427,167 @@ function openTradeModal(button) {
     // Configure modal based on type
     configureModalForType(type, action);
     
-    // Update TradingView widget
+    // Update TradingView widget for both desktop and mobile
     updateTradingViewWidget(symbol);
+    updateMobileTradingViewWidget(symbol);
+    
+    // Copy trading content to mobile tab
+    copyTradingContentToMobile();
     
     // Show modal
     const modal = new bootstrap.Modal(document.getElementById('tradeModal'));
     modal.show();
+}
+
+// Copy trading forms to mobile tab
+function copyTradingContentToMobile() {
+    const desktopTradingContent = document.getElementById('tradingTabsContent');
+    const mobileContentContainer = document.getElementById('mobile-trading-content');
+    
+    if (desktopTradingContent && mobileContentContainer) {
+        // Clone the desktop trading content
+        const clonedContent = desktopTradingContent.cloneNode(true);
+        
+        // Update IDs to avoid conflicts
+        clonedContent.id = 'mobile-trading-tabs-content';
+        
+        // Update form IDs and input names for mobile
+        const forms = clonedContent.querySelectorAll('form');
+        forms.forEach((form, index) => {
+            form.id = form.id + '-mobile';
+            
+            // Update input IDs
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.id) {
+                    input.id = input.id + '-mobile';
+                }
+                // Keep the same name attributes for form submission
+            });
+        });
+        
+        // Clear mobile container and add cloned content
+        mobileContentContainer.innerHTML = '';
+        mobileContentContainer.appendChild(clonedContent);
+        
+        // Reinitialize event listeners for mobile forms
+        initializeMobileFormListeners();
+    }
+}
+
+// Initialize mobile form event listeners
+function initializeMobileFormListeners() {
+    // Mobile buy total calculation
+    const mobileBuyInput = document.getElementById('usd_amount-mobile');
+    if (mobileBuyInput) {
+        mobileBuyInput.addEventListener('input', function() {
+            calculateMobileTrade('buy');
+        });
+    }
+    
+    // Mobile sell total calculation  
+    const mobileSellInput = document.getElementById('amountSell-mobile');
+    if (mobileSellInput) {
+        mobileSellInput.addEventListener('input', function() {
+            calculateMobileTrade('sell');
+        });
+    }
+}
+
+// Mobile trade calculation
+function calculateMobileTrade(type) {
+    if (type === 'buy') {
+        const usdAmount = parseFloat(document.getElementById('usd_amount-mobile').value) || 0;
+        const priceUSD = parseFloat(document.getElementById('modalPrice').textContent.replace(',', '.'));
+        const submitBtn = document.querySelector('#buyForm-mobile button[type="submit"]');
+        
+        if (usdAmount <= 0) {
+            // Reset displays
+            const totalValue = document.querySelector('#mobile-trading-tabs-content #totalValue');
+            const requiredMargin = document.querySelector('#mobile-trading-tabs-content #requiredMargin');
+            const tradingFee = document.querySelector('#mobile-trading-tabs-content #tradingFee');
+            
+            if (totalValue) totalValue.textContent = '$0.00';
+            if (requiredMargin) requiredMargin.textContent = '$0.00';
+            if (tradingFee) tradingFee.textContent = '$0.00';
+            
+            // Reset button
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.className = 'btn btn-success w-100 btn-lg';
+                submitBtn.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>SATIN AL';
+            }
+            return;
+        }
+        
+        const fee = usdAmount * 0.001; // 0.1% fee
+        let currentBalance, totalWithFee, remainingBalance;
+        
+        if (TRADING_CURRENCY === 1) { // TL Mode
+            const totalTL = usdAmount * USD_TRY_RATE;
+            const feeTL = fee * USD_TRY_RATE;
+            totalWithFee = totalTL + feeTL;
+            
+            currentBalance = <?php echo isLoggedIn() ? getUserBalance($_SESSION['user_id'], 'tl') : 10000; ?>;
+            remainingBalance = currentBalance - totalWithFee;
+            
+            // Update mobile displays
+            const totalValue = document.querySelector('#mobile-trading-tabs-content #totalValue');
+            const requiredMargin = document.querySelector('#mobile-trading-tabs-content #requiredMargin');
+            const tradingFee = document.querySelector('#mobile-trading-tabs-content #tradingFee');
+            
+            if (totalValue) totalValue.textContent = formatTurkishNumber(totalTL, 2) + ' TL';
+            if (requiredMargin) requiredMargin.textContent = formatTurkishNumber(totalWithFee, 2) + ' TL';
+            if (tradingFee) tradingFee.textContent = formatTurkishNumber(remainingBalance, 2) + ' TL';
+            
+        } else { // USD Mode
+            totalWithFee = usdAmount + fee;
+            currentBalance = <?php echo isLoggedIn() ? getUserBalance($_SESSION['user_id'], 'usd') : 1000; ?>;
+            remainingBalance = currentBalance - totalWithFee;
+            
+            // Update mobile displays
+            const totalValue = document.querySelector('#mobile-trading-tabs-content #totalValue');
+            const requiredMargin = document.querySelector('#mobile-trading-tabs-content #requiredMargin');
+            const tradingFee = document.querySelector('#mobile-trading-tabs-content #tradingFee');
+            
+            if (totalValue) totalValue.textContent = formatTurkishNumber(usdAmount, 2) + ' USD';
+            if (requiredMargin) requiredMargin.textContent = formatTurkishNumber(totalWithFee, 2) + ' USD';
+            if (tradingFee) tradingFee.textContent = formatTurkishNumber(remainingBalance, 2) + ' USD';
+        }
+        
+        // Mobile button control
+        if (submitBtn) {
+            if (totalWithFee > currentBalance) {
+                submitBtn.disabled = true;
+                submitBtn.className = 'btn btn-danger w-100 btn-lg';
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>YETERSİZ BAKİYE';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.className = 'btn btn-success w-100 btn-lg';
+                submitBtn.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>SATIN AL';
+            }
+        }
+    }
+}
+
+// Update mobile TradingView widget
+function updateMobileTradingViewWidget(symbol) {
+    let tvSymbol = symbol;
+    
+    // Convert symbols to TradingView format
+    if (symbol.includes('=X')) {
+        tvSymbol = symbol.replace('=X', '');
+    } else if (symbol.includes('=F')) {
+        tvSymbol = symbol.replace('=F', '');
+    } else if (symbol.startsWith('^')) {
+        tvSymbol = symbol.replace('^', '');
+    }
+    
+    // Update mobile TradingView iframe
+    const mobileIframe = document.getElementById('tradingview-mobile');
+    if (mobileIframe) {
+        mobileIframe.src = `https://www.tradingview.com/widgetembed/?frameElementId=tradingview_mobile&symbol=${tvSymbol}&interval=1H&hidesidetoolbar=1&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&studies=[]&hideideas=1&theme=Light&style=1&timezone=Etc%2FUTC&locale=<?php echo getCurrentLang(); ?>&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=${tvSymbol}`;
+    }
 }
 
 function configureModalForType(type, action) {
@@ -1788,7 +2008,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="row g-0">
+                <!-- Mobile Tab Navigation -->
+                <div class="mobile-chart-tabs d-lg-none">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link active w-100" id="trading-tab-mobile" data-bs-toggle="tab" 
+                                    data-bs-target="#trading-pane-mobile" type="button" role="tab">
+                                <i class="fas fa-coins me-1"></i><?php echo getCurrentLang() == 'tr' ? 'İşlem' : 'Trading'; ?>
+                            </button>
+                        </li>
+                        <li class="nav-item flex-fill" role="presentation">
+                            <button class="nav-link w-100" id="chart-tab-mobile" data-bs-toggle="tab" 
+                                    data-bs-target="#chart-pane-mobile" type="button" role="tab">
+                                <i class="fas fa-chart-line me-1"></i><?php echo getCurrentLang() == 'tr' ? 'Grafik' : 'Chart'; ?>
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mobile-tab-content">
+                        <!-- Mobile Trading Tab -->
+                        <div class="tab-pane fade show active" id="trading-pane-mobile" role="tabpanel">
+                            <div class="trading-container-mobile">
+                                <div class="p-3">
+                                    <!-- Mobile Trading Forms (will be populated by JavaScript) -->
+                                    <div id="mobile-trading-content">
+                                        <!-- Content will be dynamically copied here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Chart Tab -->
+                        <div class="tab-pane fade" id="chart-pane-mobile" role="tabpanel">
+                            <div class="chart-container-mobile">
+                                <div class="p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="mb-0">📈 <?php echo getCurrentLang() == 'tr' ? 'Fiyat Grafiği' : 'Price Chart'; ?></h6>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-secondary">1D</button>
+                                            <button type="button" class="btn btn-outline-secondary active">1H</button>
+                                            <button type="button" class="btn btn-outline-secondary">15M</button>
+                                        </div>
+                                    </div>
+                                    <div class="chart-container">
+                                        <iframe id="tradingview-mobile" 
+                                                src="https://www.tradingview.com/widgetembed/?frameElementId=tradingview_mobile&symbol=AAPL&interval=1H&hidesidetoolbar=1&hidetoptoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&studies=[]&hideideas=1&theme=Light&style=1&timezone=Etc%2FUTC&locale=<?php echo getCurrentLang(); ?>&utm_source=localhost&utm_medium=widget&utm_campaign=chart&utm_term=AAPL"
+                                                style="width: 100%; height: 400px; border: none;">
+                                        </iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Layout -->
+                <div class="row g-0 d-none d-lg-flex">
                     <!-- Chart Section -->
                     <div class="col-md-8 border-end">
                         <div class="p-3">
