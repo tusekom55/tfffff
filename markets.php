@@ -2562,13 +2562,21 @@ function initMobileHeaderBalance() {
                     <!-- Trading Section -->
                     <div class="col-md-4">
                         <div class="p-3">
-                            <!-- Only Buy Tab - Sell Tab Removed -->
-                            <div class="mb-3">
-                                <h6 class="text-center mb-0">
-                                    <i class="fas fa-shopping-cart me-2 text-success"></i>
-                                    <?php echo getCurrentLang() == 'tr' ? 'Satın Al' : 'Buy Order'; ?>
-                                </h6>
-                            </div>
+                            <!-- Trading Tabs -->
+                            <ul class="nav nav-tabs mb-3" id="tradingTabs" role="tablist">
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <button class="nav-link active w-100" id="buy-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#buy-pane" type="button" role="tab">
+                                        <i class="fas fa-shopping-cart me-1"></i>SATIN AL
+                                    </button>
+                                </li>
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <button class="nav-link w-100" id="sell-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#sell-pane" type="button" role="tab">
+                                        <i class="fas fa-hand-holding-usd me-1"></i>SAT
+                                    </button>
+                                </li>
+                            </ul>
                             
                             <div class="tab-content" id="tradingTabsContent">
                                 <!-- Buy/Long Form -->

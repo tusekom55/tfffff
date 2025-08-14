@@ -1,8 +1,9 @@
 <?php
-// Error logging - sadece log'a yaz, output'a çıkarma
-error_reporting(E_ALL);
-ini_set('display_errors', 0);  // Output'a error yazdırma
-ini_set('log_errors', 1);      // Log'a yaz
+// Tamamen clean JSON output için
+error_reporting(0);             // Error reporting kapat
+ini_set('display_errors', 0);  // Display errors kapat  
+ini_set('log_errors', 0);      // Log errors kapat
+ob_clean(); // Output buffer temizle
 
 try {
     require_once '../includes/functions.php';
