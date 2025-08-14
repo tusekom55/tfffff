@@ -53,7 +53,7 @@ $recent_transactions = getUserTransactions($user_id, 20);
 include 'includes/header.php';
 ?>
 
-<div class="container">
+<div class="container" style="padding-top: 2rem;">
     <!-- Portfolio Header -->
     <div class="row mb-4">
         <div class="col-12">
