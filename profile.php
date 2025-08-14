@@ -241,6 +241,29 @@ include 'includes/header.php';
                 </div>
             </div>
             
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">💰 Para İşlemleri</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#depositModal">
+                            <i class="fas fa-plus-circle me-2"></i>Para Yatır
+                        </button>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                            <i class="fas fa-minus-circle me-2"></i>Para Çek
+                        </button>
+                        <a href="portfolio.php" class="btn btn-primary">
+                            <i class="fas fa-chart-pie me-2"></i>Portföyüm
+                        </a>
+                        <a href="trading.php" class="btn btn-info">
+                            <i class="fas fa-history me-2"></i>İşlem Geçmişi
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Account Security -->
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white">
