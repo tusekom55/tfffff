@@ -57,40 +57,68 @@ include 'includes/header.php';
     <!-- Portfolio Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h2 class="h4 mb-0">💼 Portföyüm</h2>
-                            <p class="text-muted mb-0">Sahip olduğunuz varlıklar ve performansları</p>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <div class="portfolio-stats">
-                                <div class="stat-item">
-                                    <small class="text-muted">Toplam Değer</small>
-                                    <div class="h5 mb-0">
-                                        <?php 
-                                        if ($trading_currency == 1) {
-                                            echo formatTurkishNumber(convertUSDToTL($portfolio_stats['current_value']), 2) . ' TL';
-                                        } else {
-                                            echo formatTurkishNumber($portfolio_stats['current_value'], 2) . ' USD';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="stat-item mt-2">
-                                    <small class="text-muted">Kar/Zarar</small>
-                                    <div class="h6 mb-0 <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'text-success' : 'text-danger'; ?>">
-                                        <?php 
-                                        $profit_loss_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['profit_loss']) : $portfolio_stats['profit_loss'];
-                                        echo ($portfolio_stats['profit_loss'] >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_display, 2) . ' ' . $currency_symbol;
-                                        ?>
-                                        <span class="ms-1">(<?php echo ($portfolio_stats['profit_loss_percentage'] >= 0 ? '+' : '') . formatTurkishNumber($portfolio_stats['profit_loss_percentage'], 2); ?>%)</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="mb-3">
+                <h2 class="h3 mb-1">💼 Portföyüm</h2>
+                <p class="text-muted mb-0">Sahip olduğunuz varlıklar ve performansları</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 mb-2">💰</div>
+                    <h6 class="text-muted mb-2">Toplam Portföy Değeri</h6>
+                    <div class="h4 mb-0 text-primary fw-bold">
+                        <?php 
+                        if ($trading_currency == 1) {
+                            echo formatTurkishNumber(convertUSDToTL($portfolio_stats['current_value']), 2) . ' TL';
+                        } else {
+                            echo formatTurkishNumber($portfolio_stats['current_value'], 2) . ' USD';
+                        }
+                        ?>
                     </div>
+                    <small class="text-muted">
+                        Yatırım: <?php 
+                        $invested_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['total_invested']) : $portfolio_stats['total_invested'];
+                        echo formatTurkishNumber($invested_display, 2) . ' ' . $currency_symbol;
+                        ?>
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 mb-2"><?php echo $portfolio_stats['profit_loss'] >= 0 ? '📈' : '📉'; ?></div>
+                    <h6 class="text-muted mb-2">Toplam Kar/Zarar</h6>
+                    <div class="h4 mb-0 fw-bold <?php echo $portfolio_stats['profit_loss'] >= 0 ? 'text-success' : 'text-danger'; ?>">
+                        <?php 
+                        $profit_loss_display = $trading_currency == 1 ? convertUSDToTL($portfolio_stats['profit_loss']) : $portfolio_stats['profit_loss'];
+                        echo ($portfolio_stats['profit_loss'] >= 0 ? '+' : '') . formatTurkishNumber($profit_loss_display, 2) . ' ' . $currency_symbol;
+                        ?>
+                    </div>
+                    <small class="<?php echo $portfolio_stats['profit_loss_percentage'] >= 0 ? 'text-success' : 'text-danger'; ?> fw-semibold">
+                        <?php echo ($portfolio_stats['profit_loss_percentage'] >= 0 ? '+' : '') . formatTurkishNumber($portfolio_stats['profit_loss_percentage'], 2); ?>% Getiri
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="display-6 mb-2">📊</div>
+                    <h6 class="text-muted mb-2">Portföy Durumu</h6>
+                    <div class="h4 mb-0 fw-bold text-info">
+                        <?php echo count($portfolio); ?> Varlık
+                    </div>
+                    <small class="text-muted">
+                        Mevcut bakiye: <?php echo formatTurkishNumber($balance, 2) . ' ' . $currency_symbol; ?>
+                    </small>
                 </div>
             </div>
         </div>
