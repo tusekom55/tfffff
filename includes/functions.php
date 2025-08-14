@@ -1577,10 +1577,10 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
                     return false;
                 }
                 
-                // Record transaction
+                // Record transaction (always in USD for consistency)
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $tl_amount, $fee_tl]);
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $usd_amount, 0]);
                 
                 if (!$transaction_insert) {
                     $db->rollback();
@@ -1609,10 +1609,10 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
                     return false;
                 }
                 
-                // Record transaction
+                // Record transaction (always in USD for consistency)
                 $query = "INSERT INTO transactions (user_id, type, symbol, amount, price, total, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $db->prepare($query);
-                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $tl_amount, $fee_tl]);
+                $transaction_insert = $stmt->execute([$user_id, $action, $symbol, $quantity, $usd_price, $usd_amount, 0]);
                 if (!$transaction_insert) {
                     $db->rollback();
                     return false;

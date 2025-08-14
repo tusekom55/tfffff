@@ -352,12 +352,14 @@ include 'includes/header.php';
                                     <td class="text-end py-3 pe-4">
                                         <div class="fw-bold">
                                             <?php 
+                                            // Transaction total is always in USD now
                                             if ($trading_currency == 1) {
-                                                echo formatTurkishNumber($transaction['total'], 2) . ' TL';
+                                                // Convert USD to TL for display
+                                                $tl_total = $transaction['total'] * getUSDTRYRate();
+                                                echo formatTurkishNumber($tl_total, 2) . ' TL';
                                             } else {
-                                                // Convert TL to USD if needed for display
-                                                $usd_total = $transaction['total'] / getUSDTRYRate();
-                                                echo formatTurkishNumber($usd_total, 2) . ' USD';
+                                                // Show USD directly
+                                                echo formatTurkishNumber($transaction['total'], 2) . ' USD';
                                             }
                                             ?>
                                         </div>
