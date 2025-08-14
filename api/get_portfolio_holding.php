@@ -32,11 +32,11 @@ $symbol = $input['symbol'];
 $user_id = $_SESSION['user_id'];
 
 try {
-    // Direct database connection
+    // Direct database connection - doğru credentials
     $db = new PDO(
-        'mysql:host=localhost;dbname=u904974154_khaki;charset=utf8', 
-        'u904974154_khaki', 
-        'Khaki123!',
+        'mysql:host=localhost;dbname=u225998063_hurrra;charset=utf8', 
+        'u225998063_seccc', 
+        '123456Tubb',
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     
