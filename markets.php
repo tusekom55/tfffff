@@ -431,7 +431,7 @@ foreach($_SESSION as $session_key => $session_value) {
                                             data-price="<?php echo $market['price']; ?>" 
                                             data-action="sell"
                                             data-type="simple"
-                                            onclick="event.stopPropagation(); openTradeModal(this);">
+                                            onclick="event.stopPropagation(); openSellModal(this);">
                                         <i class="fas fa-hand-holding-usd me-1"></i>SAT
                                     </button>
                                     <button type="button" class="btn btn-warning btn-sm trade-btn" 
@@ -1406,6 +1406,96 @@ function animatePriceChange(element, isUp) {
         element.classList.remove('price-up', 'price-down');
     }, 500);
 }
+// SAT butonu özel fonksiyonu - Sahiplik kontrolü ile
+function openSellModal(button) {
+    const symbol = button.dataset.symbol;
+    const name = button.dataset.name;
+    const price = parseFloat(button.dataset.price);
+    
+    <?php if (isLoggedIn()): ?>
+    // Kullanıcı giriş yapmış - sahiplik kontrolü yap
+    fetch('api/get_portfolio_holding.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            symbol: symbol
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.holding) {
+            // Sahip - portföye yönlendir
+            window.location.href = `portfolio.php?symbol=${symbol}`;
+        } else {
+            // Sahip değil - uyarı göster
+            showNotOwnerAlert(symbol, name);
+        }
+    })
+    .catch(error => {
+        console.error('Error checking portfolio holding:', error);
+        showNotOwnerAlert(symbol, name);
+    });
+    <?php else: ?>
+    // Giriş yapmamış - login sayfasına yönlendir
+    window.location.href = 'login.php';
+    <?php endif; ?>
+}
+
+// Sahip değilsiniz uyarısı
+function showNotOwnerAlert(symbol, name) {
+    // Custom alert popup oluştur
+    const alertPopup = document.createElement('div');
+    alertPopup.className = 'success-popup show';
+    alertPopup.innerHTML = `
+        <div class="success-overlay" onclick="closeNotOwnerAlert()"></div>
+        <div class="success-content">
+            <div class="success-icon">
+                <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+            </div>
+            <h3 style="color: #ffc107;">Bu Varlığa Sahip Değilsiniz</h3>
+            <p class="mb-4">
+                <strong>${symbol}</strong> (${name}) satabilmek için önce portföyünüzde bulunması gerekiyor.
+            </p>
+            <div class="d-grid gap-2">
+                <button onclick="buyInstead('${symbol}')" class="btn btn-success">
+                    <i class="fas fa-shopping-cart me-2"></i>Önce Satın Al
+                </button>
+                <button onclick="window.open('portfolio.php', '_blank')" class="btn btn-outline-secondary">
+                    <i class="fas fa-chart-pie me-2"></i>Portföyümü Gör
+                </button>
+                <button onclick="closeNotOwnerAlert()" class="btn btn-outline-dark">
+                    <i class="fas fa-times me-2"></i>Kapat
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(alertPopup);
+}
+
+// Uyarı kapat
+function closeNotOwnerAlert() {
+    const popup = document.querySelector('.success-popup');
+    if (popup) {
+        popup.classList.add('closing');
+        setTimeout(() => {
+            popup.remove();
+        }, 300);
+    }
+}
+
+// Önce satın al - AL modalını aç
+function buyInstead(symbol) {
+    closeNotOwnerAlert();
+    // AL modalını bul ve aç
+    const buyButton = document.querySelector(`[data-symbol="${symbol}"][data-action="buy"]`);
+    if (buyButton) {
+        openTradeModal(buyButton);
+    }
+}
+
 // Trading modal functions
 function openTradeModal(button) {
     const symbol = button.dataset.symbol;
@@ -2463,19 +2553,13 @@ function initMobileHeaderBalance() {
                     <!-- Trading Section -->
                     <div class="col-md-4">
                         <div class="p-3">
-                            <!-- Buy/Sell Tabs -->
-                            <ul class="nav nav-pills nav-fill mb-3" id="tradingTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="buy-tab" data-bs-toggle="pill" data-bs-target="#buy-pane" type="button">
-                                        <i class="fas fa-arrow-up me-1"></i>LONG
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="sell-tab" data-bs-toggle="pill" data-bs-target="#sell-pane" type="button">
-                                        <i class="fas fa-arrow-down me-1"></i>SHORT
-                                    </button>
-                                </li>
-                            </ul>
+                            <!-- Only Buy Tab - Sell Tab Removed -->
+                            <div class="mb-3">
+                                <h6 class="text-center mb-0">
+                                    <i class="fas fa-shopping-cart me-2 text-success"></i>
+                                    <?php echo getCurrentLang() == 'tr' ? 'Satın Al' : 'Buy Order'; ?>
+                                </h6>
+                            </div>
                             
                             <div class="tab-content" id="tradingTabsContent">
                                 <!-- Buy/Long Form -->
