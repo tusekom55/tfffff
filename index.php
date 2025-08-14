@@ -65,6 +65,259 @@ $markets = getMarketData('us_stocks', 6);
             font-size: 2rem !important;
             margin-bottom: 0.5rem !important;
         }
+
+        /* Mobile Responsive Optimizations */
+        @media (max-width: 768px) {
+            /* Mobile Navbar Optimizations */
+            nav .container {
+                padding: 0 15px;
+            }
+            
+            nav .d-flex.align-items-center.gap-2 {
+                flex-wrap: wrap;
+                gap: 8px !important;
+            }
+            
+            /* Mobile Navigation Links - Hide some on mobile */
+            nav .d-flex.gap-1 a:nth-child(3),
+            nav .d-flex.gap-1 a:nth-child(4) {
+                display: none;
+            }
+            
+            /* Mobile Balance Display */
+            nav .d-flex.align-items-center .d-flex:first-child {
+                order: 1;
+                margin-right: 8px !important;
+                margin-left: 12px;
+            }
+            
+            /* Mobile Language Switcher */
+            nav .d-flex.align-items-center > div:first-child {
+                margin-right: 8px !important;
+            }
+            
+            /* Mobile User Menu */
+            nav .d-flex.align-items-center > div:last-child button {
+                padding: 6px 12px !important;
+                font-size: 0.8rem !important;
+            }
+            
+            /* Mobile Login Buttons */
+            nav .d-flex.align-items-center a {
+                padding: 6px 12px !important;
+                font-size: 0.85rem !important;
+                margin-right: 4px !important;
+            }
+            
+            /* Hero Section Mobile */
+            .hero-slider {
+                padding-top: 60px;
+            }
+            
+            .hero-title {
+                font-size: 1.8rem !important;
+                line-height: 1.2 !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .hero-subtitle {
+                font-size: 0.9rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .hero-description {
+                font-size: 1rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            
+            .btn-cta {
+                padding: 12px 24px !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            .hero-disclaimer {
+                font-size: 0.8rem !important;
+            }
+            
+            /* Service Cards Mobile Grid */
+            section[style*="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr))"] {
+                display: block !important;
+            }
+            
+            section[style*="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr))"] > div {
+                margin-bottom: 20px !important;
+                max-width: 100% !important;
+            }
+            
+            /* Mobile Ticker */
+            section[style*="background: #0d1b4c"] .container h2 {
+                font-size: 1.5rem !important;
+                margin-bottom: 30px !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div {
+                min-width: 160px !important;
+                padding: 15px !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div > div:first-child {
+                width: 40px !important;
+                height: 40px !important;
+                margin: 0 auto 10px !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div > div:nth-child(2) {
+                font-size: 1rem !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div > div:nth-child(3) {
+                font-size: 0.8rem !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div > div:nth-child(4) {
+                font-size: 1.1rem !important;
+            }
+            
+            div[style*="animation: marketTicker"] > div > div:nth-child(5) {
+                font-size: 0.8rem !important;
+            }
+            
+            /* Promo Cards Mobile */
+            .promo-grid {
+                display: block !important;
+            }
+            
+            .promo-card {
+                margin-bottom: 20px !important;
+                flex-direction: column !important;
+            }
+            
+            .promo-content,
+            .promo-visual {
+                width: 100% !important;
+                text-align: center !important;
+            }
+            
+            .promo-visual {
+                margin-top: 20px !important;
+                order: 2 !important;
+            }
+            
+            /* Education Section Mobile */
+            section[style*="background: #f8f9fa; padding: 80px 0"] {
+                padding: 40px 0 !important;
+            }
+            
+            section[style*="background: #f8f9fa; padding: 80px 0"] h2 {
+                font-size: 1.8rem !important;
+                margin-bottom: 15px !important;
+            }
+            
+            section[style*="background: #f8f9fa; padding: 80px 0"] p {
+                font-size: 1rem !important;
+                margin-bottom: 40px !important;
+            }
+            
+            section[style*="background: #f8f9fa; padding: 80px 0"] > div > div:last-child {
+                display: block !important;
+            }
+            
+            section[style*="background: #f8f9fa; padding: 80px 0"] > div > div:last-child > div {
+                margin-bottom: 25px !important;
+            }
+            
+            /* Contact CTA Mobile */
+            .contact-cta .contact-content {
+                flex-direction: column !important;
+            }
+            
+            .contact-info,
+            .contact-form {
+                width: 100% !important;
+                margin-bottom: 30px !important;
+            }
+            
+            .contact-info h2 {
+                font-size: 1.6rem !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .contact-features {
+                margin-bottom: 30px !important;
+            }
+            
+            .contact-features .feature {
+                margin-bottom: 10px !important;
+                font-size: 0.9rem !important;
+            }
+            
+            /* Live Support Button Mobile */
+            .live-support {
+                bottom: 80px !important;
+                right: 15px !important;
+            }
+            
+            .support-btn {
+                padding: 10px 15px !important;
+                font-size: 0.85rem !important;
+            }
+            
+            .support-btn span {
+                display: none !important;
+            }
+            
+            .support-btn i {
+                margin-right: 0 !important;
+                font-size: 1.2rem !important;
+            }
+        }
+
+        /* Very Small Mobile (320px-480px) */
+        @media (max-width: 480px) {
+            .container {
+                padding-left: 10px !important;
+                padding-right: 10px !important;
+            }
+            
+            /* Extra small mobile navbar */
+            nav .d-flex.gap-1 a {
+                font-size: 0.75rem !important;
+                padding: 6px 8px !important;
+            }
+            
+            nav a[href="index.php"] {
+                font-size: 1.2rem !important;
+            }
+            
+            /* Hero mobile extra small */
+            .hero-title {
+                font-size: 1.5rem !important;
+            }
+            
+            .hero-description {
+                font-size: 0.9rem !important;
+            }
+            
+            .btn-cta {
+                font-size: 0.8rem !important;
+                padding: 10px 20px !important;
+            }
+            
+            /* Service cards extra small */
+            div[style*="padding: 40px 30px"] {
+                padding: 25px 20px !important;
+            }
+            
+            div[style*="font-size: 1.4rem"] {
+                font-size: 1.2rem !important;
+            }
+            
+            /* Education cards extra small */
+            div[style*="padding: 30px"] {
+                padding: 20px !important;
+            }
+        }
     </style>
 </head>
 <body>

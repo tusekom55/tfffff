@@ -906,6 +906,57 @@ foreach($_SESSION as $session_key => $session_value) {
     }
 }
 
+/* Sticky Categories Navigation */
+.categories-sticky {
+    position: fixed !important;
+    top: 76px !important; /* Below navbar */
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1020 !important;
+    background: #fff !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    border-bottom: 1px solid #e9ecef !important;
+    transition: all 0.3s ease !important;
+    padding: 20px 0 !important;
+}
+
+.categories-sticky .container {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+.categories-sticky .category-card {
+    transform: scale(0.9) !important;
+    margin-bottom: 0 !important;
+}
+
+.categories-sticky h5 {
+    display: none !important;
+}
+
+.categories-sticky .row {
+    margin-bottom: 0 !important;
+}
+
+/* Mobile sticky categories */
+.mobile-category-tabs.sticky {
+    position: fixed !important;
+    top: 76px !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1020 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Sticky offset compensation */
+.sticky-offset {
+    margin-top: 120px;
+}
+
+.mobile-sticky-offset {
+    margin-top: 80px;
+}
+
 @media (max-width: 768px) {
     /* Hide desktop categories, show mobile tabs */
     .desktop-categories {
@@ -1974,6 +2025,108 @@ function testModal() {
     modal.show();
 }
 
+// Sticky Categories Navigation System
+let lastScrollTop = 0;
+let categoriesOriginalPosition = null;
+let isSticky = false;
+
+function initStickyCategories() {
+    const desktopCategories = document.querySelector('.desktop-categories');
+    const mobileCategories = document.querySelector('.mobile-category-tabs');
+    const container = document.querySelector('.container');
+    
+    if (desktopCategories) {
+        categoriesOriginalPosition = desktopCategories.offsetTop;
+    }
+    
+    function handleScroll() {
+        const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+        const navbar = document.querySelector('.navbar');
+        const navbarHeight = navbar ? navbar.offsetHeight : 76;
+        
+        // Desktop sticky behavior
+        if (window.innerWidth >= 769 && desktopCategories) {
+            if (currentScroll >= categoriesOriginalPosition - navbarHeight - 20 && !isSticky) {
+                // Make sticky
+                desktopCategories.classList.add('categories-sticky');
+                isSticky = true;
+                
+                // Add offset to next element
+                const nextElement = desktopCategories.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.add('sticky-offset');
+                }
+            } else if (currentScroll < categoriesOriginalPosition - navbarHeight - 20 && isSticky) {
+                // Remove sticky
+                desktopCategories.classList.remove('categories-sticky');
+                isSticky = false;
+                
+                // Remove offset
+                const nextElement = desktopCategories.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.remove('sticky-offset');
+                }
+            }
+        }
+        
+        // Mobile sticky behavior
+        if (window.innerWidth < 769 && mobileCategories) {
+            const categoriesPosition = mobileCategories.offsetTop;
+            
+            if (currentScroll >= categoriesPosition - navbarHeight && !mobileCategories.classList.contains('sticky')) {
+                mobileCategories.classList.add('sticky');
+                
+                // Add offset to content
+                const nextElement = mobileCategories.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.add('mobile-sticky-offset');
+                }
+            } else if (currentScroll < categoriesPosition - navbarHeight && mobileCategories.classList.contains('sticky')) {
+                mobileCategories.classList.remove('sticky');
+                
+                // Remove offset
+                const nextElement = mobileCategories.nextElementSibling;
+                if (nextElement) {
+                    nextElement.classList.remove('mobile-sticky-offset');
+                }
+            }
+        }
+        
+        lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+    }
+    
+    // Throttled scroll event
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+        if (!ticking) {
+            requestAnimationFrame(function() {
+                handleScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        // Reset sticky state on resize
+        if (desktopCategories) {
+            desktopCategories.classList.remove('categories-sticky');
+            categoriesOriginalPosition = desktopCategories.offsetTop;
+        }
+        if (mobileCategories) {
+            mobileCategories.classList.remove('sticky');
+        }
+        isSticky = false;
+        
+        // Remove all offsets
+        const elements = document.querySelectorAll('.sticky-offset, .mobile-sticky-offset');
+        elements.forEach(el => {
+            el.classList.remove('sticky-offset', 'mobile-sticky-offset');
+        });
+    });
+}
+
 // Add click event listener when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Page loaded, adding modal test');
@@ -1983,7 +2136,35 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Test if modal exists
     console.log('Modal exists:', document.getElementById('tradeModal') !== null);
+    
+    // Initialize sticky categories
+    initStickyCategories();
+    
+    // Initialize header balance visibility for mobile
+    initMobileHeaderBalance();
 });
+
+// Mobile Header Balance Optimization
+function initMobileHeaderBalance() {
+    const userBalance = document.querySelector('nav .d-flex.align-items-center > div:first-child');
+    
+    if (userBalance && window.innerWidth <= 768) {
+        // Make balance more prominent on mobile
+        userBalance.style.order = '1';
+        userBalance.style.marginLeft = '12px';
+        userBalance.style.fontSize = '0.8rem';
+        
+        // Add mobile-specific styling
+        const balanceSpan = userBalance.querySelector('span');
+        const balanceStrong = userBalance.querySelector('strong');
+        
+        if (balanceSpan) balanceSpan.style.display = 'none'; // Hide "Bakiye:" text on mobile
+        if (balanceStrong) {
+            balanceStrong.style.color = '#28a745';
+            balanceStrong.style.fontWeight = '600';
+        }
+    }
+}
 </script>
 
 <!-- Trading Modal -->
