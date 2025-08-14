@@ -1414,6 +1414,8 @@ function openSellModal(button) {
     
     <?php if (isLoggedIn()): ?>
     // Kullanıcı giriş yapmış - sahiplik kontrolü yap
+    console.log('🔍 Checking portfolio holding for:', symbol);
+    
     fetch('api/get_portfolio_holding.php', {
         method: 'POST',
         headers: {
@@ -1423,18 +1425,25 @@ function openSellModal(button) {
             symbol: symbol
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('📊 API Response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('📈 API Response data:', data);
+        
         if (data.success && data.holding) {
+            console.log('✅ Holding found:', data.holding);
             // Sahip - portföye yönlendir
             window.location.href = `portfolio.php?symbol=${symbol}`;
         } else {
+            console.log('❌ No holding found:', data.error || 'Unknown error');
             // Sahip değil - uyarı göster
             showNotOwnerAlert(symbol, name);
         }
     })
     .catch(error => {
-        console.error('Error checking portfolio holding:', error);
+        console.error('🚨 Error checking portfolio holding:', error);
         showNotOwnerAlert(symbol, name);
     });
     <?php else: ?>

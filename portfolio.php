@@ -442,11 +442,7 @@ include 'includes/header.php';
                 <div class="modal-body">
                     <div class="text-center mb-3">
                         <div class="mb-2">
-                            <img id="sellAssetLogo" src="" alt="" class="rounded-circle" width="48" height="48" style="display: none;">
-                            <div id="sellAssetLogoFallback" class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
-                                 style="width: 48px; height: 48px; display: none;">
-                                <i class="fas fa-coins text-white"></i>
-                            </div>
+                            <img id="sellAssetLogo" src="" alt="" class="rounded-circle" width="48" height="48" style="display: block;">
                         </div>
                         <h6 id="sellAssetName">Apple Inc.</h6>
                         <p class="text-muted mb-0">Güncel Fiyat: $<span id="sellCurrentPrice">175.50</span></p>
@@ -521,9 +517,8 @@ function showSellModal(symbol, name, quantity, price) {
     currentSellPrice = price;
     maxQuantity = quantity;
     
-    // Set logo for modal - ORJİNAL LOGO KULLAN
+    // Set logo for modal - SADECE ORJİNAL LOGO
     const logoImg = document.getElementById('sellAssetLogo');
-    const logoFallback = document.getElementById('sellAssetLogoFallback');
     
     // Portfolio tablosundan logo URL'ini al
     const portfolioRows = document.querySelectorAll('table tbody tr');
@@ -539,22 +534,19 @@ function showSellModal(symbol, name, quantity, price) {
         }
     });
     
-    // Logo varsa göster, yoksa fallback
+    // Sadece orjinal logo varsa göster
     if (logoUrl && logoUrl !== '') {
         logoImg.src = logoUrl;
         logoImg.alt = name;
         logoImg.style.display = 'block';
-        logoFallback.style.display = 'none';
         
-        // Logo yüklenemezse fallback'e geç
+        // Logo yüklenemezse gizle (fallback yok)
         logoImg.onerror = function() {
             logoImg.style.display = 'none';
-            logoFallback.style.display = 'flex';
         };
     } else {
-        // Logo bulunamazsa fallback kullan
+        // Logo bulunamazsa gizle
         logoImg.style.display = 'none';
-        logoFallback.style.display = 'flex';
     }
     
     // Reset form
