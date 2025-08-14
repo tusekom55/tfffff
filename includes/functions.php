@@ -1551,7 +1551,7 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
             // Convert USD to TL
             $usd_to_tl_rate = getUSDTRYRate();
             $tl_amount = $usd_amount * $usd_to_tl_rate;
-            $fee_tl = $tl_amount * 0.001; // 0.1% fee
+            $fee_tl = 0; // No fee
             $total_tl = $tl_amount + $fee_tl;
             
             if ($action == 'buy') {
@@ -1620,7 +1620,7 @@ function executeSimpleTrade($user_id, $symbol, $action, $usd_amount, $usd_price)
             }
             
         } else { // USD Mode
-            $fee_usd = $usd_amount * 0.001; // 0.1% fee
+            $fee_usd = 0; // No fee
             $total_usd = $usd_amount + $fee_usd;
             
             if ($action == 'buy') {

@@ -325,7 +325,7 @@ include 'includes/header.php';
                                 <span class="text-muted">Satış Tutarı:</span>
                                 <span class="fw-bold" id="sellTotalUSD">$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex justify-content-between mb-2" style="display: none !important;">
                                 <span class="text-muted">İşlem Ücreti (0.1%):</span>
                                 <span id="sellFee">$0.00</span>
                             </div>
@@ -394,7 +394,7 @@ function calculateSellTotal() {
     }
     
     const totalUSD = quantity * currentSellPrice;
-    const feeUSD = totalUSD * 0.001; // 0.1% fee
+    const feeUSD = 0; // No fee
     const netUSD = totalUSD - feeUSD;
     
     document.getElementById('sellTotalUSD').textContent = '$' + formatTurkishNumber(totalUSD, 2);

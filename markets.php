@@ -1643,8 +1643,8 @@ function calculateMobileTrade(type) {
             return;
         }
         
-        const fee = usdAmount * 0.001; // 0.1% fee
-        let currentBalance, totalWithFee, remainingBalance;
+    const fee = 0; // No fee
+    let currentBalance, totalWithFee, remainingBalance;
         
         if (TRADING_CURRENCY === 1) { // TL Mode
             const totalTL = usdAmount * USD_TRY_RATE;
