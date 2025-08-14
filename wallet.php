@@ -96,6 +96,26 @@ $stmt = $db->prepare($query);
 $stmt->execute([$user_id]);
 $withdrawals = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Get payment methods from database
+$query = "SELECT * FROM payment_methods WHERE is_active = 1 ORDER BY sort_order";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$payment_methods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Group payment methods by type
+$banks = [];
+$cryptos = [];
+$digital = [];
+foreach ($payment_methods as $method) {
+    if ($method['type'] == 'bank') {
+        $banks[] = $method;
+    } elseif ($method['type'] == 'crypto') {
+        $cryptos[] = $method;
+    } elseif ($method['type'] == 'digital') {
+        $digital[] = $method;
+    }
+}
+
 include 'includes/header.php';
 ?>
 
@@ -110,10 +130,10 @@ include 'includes/header.php';
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 col-6 mb-3">
-                            <div class="text-center p-3 bg-light rounded">
-                                <i class="fas fa-lira-sign fa-2x text-primary mb-2"></i>
-                                <div class="h4 mb-1"><?php echo formatNumber($balance_tl); ?></div>
-                                <small class="text-muted">Türk Lirası</small>
+                            <div class="text-center p-3 bg-success bg-opacity-10 rounded border border-success">
+                                <i class="fas fa-lira-sign fa-2x text-success mb-2"></i>
+                                <div class="h4 mb-1 text-success"><?php echo formatNumber($balance_tl); ?></div>
+                                <small class="text-success">Türk Lirası</small>
                             </div>
                         </div>
                         <div class="col-md-3 col-6 mb-3">
@@ -291,49 +311,57 @@ include 'includes/header.php';
                                 <!-- Banka Bilgileri -->
                                 <div id="bankDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <label class="form-label">Banka</label>
+                                        <label class="form-label">Banka Seçiniz</label>
                                         <select class="form-select" name="bank_name">
                                             <option value="">Banka Seçiniz</option>
-                                            <option value="ziraat">🟢 Ziraat Bankası</option>
-                                            <option value="akbank">🔵 Akbank</option>
-                                            <option value="garanti">🟠 Garanti BBVA</option>
-                                            <option value="isbank">🔴 İş Bankası</option>
-                                            <option value="vakifbank">🟡 VakıfBank</option>
-                                            <option value="halkbank">⚫ Halkbank</option>
-                                            <option value="other">🏦 Diğer</option>
+                                            <?php foreach ($banks as $bank): ?>
+                                            <option value="<?php echo $bank['code']; ?>">
+                                                <?php echo $bank['icon']; ?> <?php echo $bank['name']; ?>
+                                            </option>
+                                            <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">IBAN</label>
                                         <input type="text" class="form-control" name="iban_info" 
-                                               placeholder="TR00 0000 0000 0000 0000 0000 00">
+                                               placeholder="TR00 0000 0000 0000 0000 0000 00" required>
                                     </div>
                                 </div>
 
                                 <!-- Papara Bilgileri -->
                                 <div id="paparaDetails" style="display: none;">
+                                    <?php foreach ($digital as $method): ?>
                                     <div class="mb-3">
-                                        <label class="form-label">📱 Papara Hesap No</label>
+                                        <label class="form-label"><?php echo $method['icon']; ?> <?php echo $method['name']; ?> Hesap No</label>
                                         <input type="text" class="form-control" name="papara_info" 
-                                               placeholder="1234567890">
+                                               placeholder="<?php echo $method['name']; ?> hesap numaranız" required>
                                     </div>
+                                    <?php endforeach; ?>
                                 </div>
 
                                 <!-- Kripto Bilgileri -->
                                 <div id="cryptoDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <label class="form-label">Kripto Para</label>
-                                        <select class="form-select" name="crypto_type">
-                                            <option value="">Seçiniz</option>
-                                            <option value="bitcoin">₿ Bitcoin (BTC)</option>
-                                            <option value="ethereum">⟠ Ethereum (ETH)</option>
-                                            <option value="usdt">₮ Tether (USDT)</option>
+                                        <label class="form-label">Kripto Para Seçiniz</label>
+                                        <select class="form-select" name="crypto_type" required>
+                                            <option value="">Kripto Para Seçiniz</option>
+                                            <?php foreach ($cryptos as $crypto): ?>
+                                            <option value="<?php echo $crypto['code']; ?>">
+                                                <?php echo $crypto['icon']; ?> <?php echo $crypto['name']; ?> (<?php echo $crypto['code']; ?>)
+                                            </option>
+                                            <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Wallet Adresi</label>
                                         <input type="text" class="form-control" name="crypto_address" 
-                                               placeholder="Cüzdan adresinizi girin">
+                                               placeholder="Kripto para cüzdan adresinizi girin" required>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <small>
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Network ücretleri çekim tutarından düşülecektir.
+                                        </small>
                                     </div>
                                 </div>
                                 

@@ -143,6 +143,42 @@ function createTables() {
     )";
     $db->exec($query);
     
+    // Payment methods table for admin management
+    $query = "CREATE TABLE IF NOT EXISTS payment_methods (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        type ENUM('bank', 'crypto', 'digital') NOT NULL,
+        name VARCHAR(100) NOT NULL,
+        code VARCHAR(50) NOT NULL,
+        icon VARCHAR(255),
+        is_active TINYINT(1) DEFAULT 1,
+        sort_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )";
+    $db->exec($query);
+    
+    // Insert default payment methods
+    $query = "INSERT IGNORE INTO payment_methods (type, name, code, icon, sort_order) VALUES 
+              ('bank', 'Ziraat Bankası', 'ziraat', '🟢', 1),
+              ('bank', 'Akbank', 'akbank', '🔵', 2),
+              ('bank', 'Garanti BBVA', 'garanti', '🟠', 3),
+              ('bank', 'İş Bankası', 'isbank', '🔴', 4),
+              ('bank', 'VakıfBank', 'vakifbank', '🟡', 5),
+              ('bank', 'Halkbank', 'halkbank', '⚫', 6),
+              ('digital', 'Papara', 'papara', '📱', 7),
+              ('crypto', 'Bitcoin', 'BTC', '₿', 8),
+              ('crypto', 'Ethereum', 'ETH', '⟠', 9),
+              ('crypto', 'Tether', 'USDT', '₮', 10),
+              ('crypto', 'Binance Coin', 'BNB', '🔸', 11),
+              ('crypto', 'Cardano', 'ADA', '🔷', 12),
+              ('crypto', 'Solana', 'SOL', '☀️', 13),
+              ('crypto', 'Polygon', 'MATIC', '🔺', 14),
+              ('crypto', 'Chainlink', 'LINK', '🔗', 15),
+              ('crypto', 'Avalanche', 'AVAX', '❄️', 16),
+              ('crypto', 'Polkadot', 'DOT', '⚪', 17),
+              ('crypto', 'Litecoin', 'LTC', '⚡', 18),
+              ('crypto', 'Dogecoin', 'DOGE', '🐕', 19)";
+    $db->exec($query);
+    
     // Insert default parameters
     $query = "INSERT IGNORE INTO system_parameters (parameter_name, parameter_value, description) VALUES 
               ('trading_currency', '1', 'Base trading currency: 1=TL, 2=USD'),
