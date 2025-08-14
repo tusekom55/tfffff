@@ -258,48 +258,166 @@ $markets = getMarketData('us_stocks', 6);
         
         .floating-icon {
             position: absolute;
-            color: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.15);
             animation: float 6s ease-in-out infinite;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
         
         .floating-icon:nth-child(1) {
-            top: 20%;
-            left: 10%;
-            font-size: 2rem;
+            top: 15%;
+            left: 8%;
+            font-size: 2.5rem;
             animation-delay: 0s;
         }
         
         .floating-icon:nth-child(2) {
-            top: 60%;
-            right: 15%;
-            font-size: 1.5rem;
+            top: 65%;
+            right: 12%;
+            font-size: 1.8rem;
             animation-delay: 2s;
         }
         
         .floating-icon:nth-child(3) {
-            bottom: 30%;
-            left: 20%;
-            font-size: 1.8rem;
+            bottom: 25%;
+            left: 15%;
+            font-size: 2rem;
             animation-delay: 4s;
         }
         
         .floating-icon:nth-child(4) {
-            top: 40%;
-            right: 30%;
-            font-size: 1.2rem;
+            top: 35%;
+            right: 25%;
+            font-size: 1.5rem;
             animation-delay: 1s;
         }
         
         .floating-icon:nth-child(5) {
-            bottom: 60%;
-            right: 10%;
-            font-size: 2.2rem;
+            bottom: 55%;
+            right: 8%;
+            font-size: 2.5rem;
             animation-delay: 3s;
         }
         
+        .floating-icon:nth-child(6) {
+            top: 25%;
+            left: 25%;
+            font-size: 1.3rem;
+            animation-delay: 5s;
+        }
+        
+        .floating-icon:nth-child(7) {
+            bottom: 40%;
+            right: 35%;
+            font-size: 1.7rem;
+            animation-delay: 1.5s;
+        }
+        
+        .floating-icon:nth-child(8) {
+            top: 50%;
+            left: 5%;
+            font-size: 1.4rem;
+            animation-delay: 3.5s;
+        }
+        
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.15; }
+            50% { transform: translateY(-25px) rotate(8deg); opacity: 0.25; }
+        }
+        
+        /* Stock ticker elements */
+        .hero-stock-ticker {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 2;
+            overflow: hidden;
+        }
+        
+        .stock-ticker-track {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            animation: stockTicker 30s linear infinite;
+            gap: 2rem;
+            white-space: nowrap;
+        }
+        
+        .stock-ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+            flex-shrink: 0;
+        }
+        
+        .stock-price {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .stock-change.positive {
+            color: #22c55e;
+        }
+        
+        .stock-change.negative {
+            color: #ef4444;
+        }
+        
+        @keyframes stockTicker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        /* Financial particles */
+        .financial-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            color: rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            animation: particle 20s linear infinite;
+        }
+        
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 4s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 8s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 12s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 16s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 2s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 6s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 10s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 14s; }
+        .particle:nth-child(10) { left: 15%; animation-delay: 18s; }
+        
+        @keyframes particle {
+            0% { 
+                transform: translateY(100vh) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 0.3; 
+            }
+            90% { 
+                opacity: 0.3; 
+            }
+            100% { 
+                transform: translateY(-10vh) rotate(360deg); 
+                opacity: 0; 
+            }
         }
         
         .hero-content {
@@ -942,13 +1060,32 @@ $markets = getMarketData('us_stocks', 6);
 
     <!-- Hero Section -->
     <section class="hero-section">
+        <!-- Financial Floating Elements -->
         <div class="hero-floating-elements">
             <div class="floating-icon"><i class="fas fa-chart-line"></i></div>
             <div class="floating-icon"><i class="fas fa-coins"></i></div>
             <div class="floating-icon"><i class="fas fa-chart-bar"></i></div>
             <div class="floating-icon"><i class="fas fa-dollar-sign"></i></div>
             <div class="floating-icon"><i class="fas fa-trending-up"></i></div>
+            <div class="floating-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="floating-icon"><i class="fas fa-piggy-bank"></i></div>
+            <div class="floating-icon"><i class="fab fa-bitcoin"></i></div>
         </div>
+        
+        <!-- Financial Particles -->
+        <div class="financial-particles">
+            <div class="particle">$</div>
+            <div class="particle">€</div>
+            <div class="particle">£</div>
+            <div class="particle">¥</div>
+            <div class="particle">₿</div>
+            <div class="particle">₹</div>
+            <div class="particle">₺</div>
+            <div class="particle">+1.2%</div>
+            <div class="particle">-0.8%</div>
+            <div class="particle">📈</div>
+        </div>
+        
         <div class="hero-content">
             <h1 class="hero-title">
                 <?php echo getCurrentLang() == 'tr' ? 
@@ -969,6 +1106,52 @@ $markets = getMarketData('us_stocks', 6);
                     <i class="fas fa-chart-line"></i>
                     <?php echo getCurrentLang() == 'tr' ? 'Piyasaları İncele' : 'Explore Markets'; ?>
                 </a>
+            </div>
+        </div>
+        
+        <!-- Hero Stock Ticker -->
+        <div class="hero-stock-ticker">
+            <div class="stock-ticker-track">
+                <div class="stock-ticker-item">
+                    <span>AAPL</span>
+                    <span class="stock-price">$175.50</span>
+                    <span class="stock-change positive">+2.3%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>MSFT</span>
+                    <span class="stock-price">$338.00</span>
+                    <span class="stock-change positive">+1.8%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>TSLA</span>
+                    <span class="stock-price">$248.00</span>
+                    <span class="stock-change negative">-0.9%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>EUR/USD</span>
+                    <span class="stock-price">1.0925</span>
+                    <span class="stock-change positive">+0.2%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>USD/TRY</span>
+                    <span class="stock-price">27.45</span>
+                    <span class="stock-change negative">-0.1%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>GOLD</span>
+                    <span class="stock-price">$1985</span>
+                    <span class="stock-change positive">+1.1%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>BTC</span>
+                    <span class="stock-price">$43,200</span>
+                    <span class="stock-change positive">+3.2%</span>
+                </div>
+                <div class="stock-ticker-item">
+                    <span>S&P 500</span>
+                    <span class="stock-price">4,485</span>
+                    <span class="stock-change positive">+0.8%</span>
+                </div>
             </div>
         </div>
     </section>
@@ -1045,8 +1228,16 @@ $markets = getMarketData('us_stocks', 6);
                     <?php if (!empty($markets)): ?>
                         <?php foreach ($markets as $market): ?>
                         <div class="ticker-item">
-                            <div style="color: #ffd700; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
-                                <?php echo $market['symbol']; ?>
+                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem;">
+                                <?php if ($market['logo_url']): ?>
+                                <img src="<?php echo $market['logo_url']; ?>" 
+                                     alt="<?php echo $market['symbol']; ?>" 
+                                     style="width: 32px; height: 32px; border-radius: 50%; margin-right: 0.5rem;"
+                                     onerror="this.style.display='none';">
+                                <?php endif; ?>
+                                <div style="color: #ffd700; font-size: 1.2rem; font-weight: 700;">
+                                    <?php echo $market['symbol']; ?>
+                                </div>
                             </div>
                             <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 0.5rem;">
                                 <?php echo $market['name']; ?>
@@ -1062,8 +1253,16 @@ $markets = getMarketData('us_stocks', 6);
                         <!-- Duplicate for seamless loop -->
                         <?php foreach ($markets as $market): ?>
                         <div class="ticker-item">
-                            <div style="color: #ffd700; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
-                                <?php echo $market['symbol']; ?>
+                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem;">
+                                <?php if ($market['logo_url']): ?>
+                                <img src="<?php echo $market['logo_url']; ?>" 
+                                     alt="<?php echo $market['symbol']; ?>" 
+                                     style="width: 32px; height: 32px; border-radius: 50%; margin-right: 0.5rem;"
+                                     onerror="this.style.display='none';">
+                                <?php endif; ?>
+                                <div style="color: #ffd700; font-size: 1.2rem; font-weight: 700;">
+                                    <?php echo $market['symbol']; ?>
+                                </div>
                             </div>
                             <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 0.5rem;">
                                 <?php echo $market['name']; ?>
