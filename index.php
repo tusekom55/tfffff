@@ -198,7 +198,9 @@ $markets = getMarketData('us_stocks', 6);
         
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 25%, var(--secondary-color) 50%, var(--primary-color) 100%);
+            background: 
+                linear-gradient(135deg, rgba(10, 14, 26, 0.8) 0%, rgba(26, 31, 58, 0.8) 25%, rgba(13, 27, 76, 0.8) 50%, rgba(0, 123, 255, 0.8) 100%),
+                url('6256878.jpg') center/cover no-repeat;
             color: #fff;
             padding: 120px 0 80px;
             margin-top: 70px;
@@ -217,9 +219,9 @@ $markets = getMarketData('us_stocks', 6);
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(40, 167, 69, 0.3) 0%, transparent 50%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>') repeat;
+                radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(40, 167, 69, 0.2) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.05"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.05"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.05"/></svg>') repeat;
             animation: heroBackground 20s ease-in-out infinite;
         }
         
