@@ -1,8 +1,8 @@
 <?php
-// Error logging için
+// Error logging - sadece log'a yaz, output'a çıkarma
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
+ini_set('display_errors', 0);  // Output'a error yazdırma
+ini_set('log_errors', 1);      // Log'a yaz
 
 try {
     require_once '../includes/functions.php';

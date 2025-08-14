@@ -2059,12 +2059,12 @@ function configureModalForType(type, action) {
 }
 
 function setupSimpleTrading(action) {
-    // Update tab labels for simple trading
+    // Update tab labels for simple trading - sadece varsa güncelle
     const buyTab = document.getElementById('buy-tab');
     const sellTab = document.getElementById('sell-tab');
     
-    buyTab.innerHTML = '<i class="fas fa-shopping-cart me-1"></i>SATIN AL';
-    sellTab.innerHTML = '<i class="fas fa-hand-holding-usd me-1"></i>SAT';
+    if (buyTab) buyTab.innerHTML = '<i class="fas fa-shopping-cart me-1"></i>SATIN AL';
+    if (sellTab) sellTab.innerHTML = '<i class="fas fa-hand-holding-usd me-1"></i>SAT';
     
     // Hide leverage controls
     const leverageControls = document.querySelectorAll('.leverage-control');
@@ -2078,24 +2078,24 @@ function setupSimpleTrading(action) {
         control.style.display = 'none';
     });
     
-    // Update button text
+    // Update button text - sadece varsa güncelle
     const buyButton = document.querySelector('#buy-pane button[type="submit"]');
     const sellButton = document.querySelector('#sell-pane button[type="submit"]');
     
-    buyButton.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>SATIN AL';
-    sellButton.innerHTML = '<i class="fas fa-hand-holding-usd me-2"></i>SAT';
+    if (buyButton) buyButton.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>SATIN AL';
+    if (sellButton) sellButton.innerHTML = '<i class="fas fa-hand-holding-usd me-2"></i>SAT';
     
     // Update calculation labels
     updateSimpleCalculationLabels();
 }
 
 function setupLeverageTrading() {
-    // Update tab labels for leverage trading
+    // Update tab labels for leverage trading - sadece varsa güncelle
     const buyTab = document.getElementById('buy-tab');
     const sellTab = document.getElementById('sell-tab');
     
-    buyTab.innerHTML = '<i class="fas fa-arrow-up me-1"></i>LONG';
-    sellTab.innerHTML = '<i class="fas fa-arrow-down me-1"></i>SHORT';
+    if (buyTab) buyTab.innerHTML = '<i class="fas fa-arrow-up me-1"></i>LONG';
+    if (sellTab) sellTab.innerHTML = '<i class="fas fa-arrow-down me-1"></i>SHORT';
     
     // Show leverage controls
     const leverageControls = document.querySelectorAll('.leverage-control');
@@ -2109,12 +2109,12 @@ function setupLeverageTrading() {
         control.style.display = 'block';
     });
     
-    // Update button text
+    // Update button text - sadece varsa güncelle
     const buyButton = document.querySelector('#buy-pane button[type="submit"]');
     const sellButton = document.querySelector('#sell-pane button[type="submit"]');
     
-    buyButton.innerHTML = '<i class="fas fa-arrow-up me-2"></i>LONG POZISYON AÇ';
-    sellButton.innerHTML = '<i class="fas fa-arrow-down me-2"></i>SHORT POZISYON AÇ';
+    if (buyButton) buyButton.innerHTML = '<i class="fas fa-arrow-up me-2"></i>LONG POZISYON AÇ';
+    if (sellButton) sellButton.innerHTML = '<i class="fas fa-arrow-down me-2"></i>SHORT POZISYON AÇ';
     
     // Update calculation labels
     updateLeverageCalculationLabels();
