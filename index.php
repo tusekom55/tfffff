@@ -198,12 +198,15 @@ $markets = getMarketData('us_stocks', 6);
         
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 25%, var(--secondary-color) 50%, var(--primary-color) 100%);
             color: #fff;
             padding: 120px 0 80px;
             margin-top: 70px;
             position: relative;
             overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
         }
         
         .hero-section::before {
@@ -213,7 +216,88 @@ $markets = getMarketData('us_stocks', 6);
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>') repeat;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(40, 167, 69, 0.3) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>') repeat;
+            animation: heroBackground 20s ease-in-out infinite;
+        }
+        
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.02) 50%, transparent 70%);
+            animation: shine 8s ease-in-out infinite;
+        }
+        
+        @keyframes heroBackground {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.1) rotate(1deg); opacity: 0.8; }
+        }
+        
+        @keyframes shine {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+        
+        .hero-floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            color: rgba(255,255,255,0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-icon:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            font-size: 2rem;
+            animation-delay: 0s;
+        }
+        
+        .floating-icon:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            font-size: 1.5rem;
+            animation-delay: 2s;
+        }
+        
+        .floating-icon:nth-child(3) {
+            bottom: 30%;
+            left: 20%;
+            font-size: 1.8rem;
+            animation-delay: 4s;
+        }
+        
+        .floating-icon:nth-child(4) {
+            top: 40%;
+            right: 30%;
+            font-size: 1.2rem;
+            animation-delay: 1s;
+        }
+        
+        .floating-icon:nth-child(5) {
+            bottom: 60%;
+            right: 10%;
+            font-size: 2.2rem;
+            animation-delay: 3s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
         }
         
         .hero-content {
@@ -420,24 +504,301 @@ $markets = getMarketData('us_stocks', 6);
             100% { transform: translateX(-50%); }
         }
         
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, #28a745, #20c997);
+        /* Education Section */
+        .education-section {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .education-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(13,27,76,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>') repeat;
+        }
+        
+        .education-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .education-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(13,27,76,0.1);
+        }
+        
+        .education-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.15);
+        }
+        
+        .education-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color), var(--warning-color));
+        }
+        
+        .education-header {
+            padding: 2rem 2rem 1rem;
+            background: linear-gradient(135deg, rgba(0,123,255,0.05), rgba(40,167,69,0.05));
+            position: relative;
+        }
+        
+        .education-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
             color: #fff;
-            padding: 80px 0;
+            box-shadow: 0 8px 24px rgba(0,123,255,0.3);
+            position: relative;
+        }
+        
+        .education-icon::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            border-radius: 22px;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.6;
+        }
+        
+        .education-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
             text-align: center;
         }
         
-        .cta-title {
-            font-size: 2.5rem;
-            font-weight: 700;
+        .education-subtitle {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .education-content {
+            padding: 1.5rem 2rem 2rem;
+        }
+        
+        .education-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem;
+        }
+        
+        .education-features li {
+            display: flex;
+            align-items: center;
             margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .education-features li::before {
+            content: '✓';
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            color: #fff;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .education-cta {
+            background: linear-gradient(135deg, var(--primary-color), #0056b3);
+            color: #fff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .education-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,123,255,0.4);
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 25%, var(--secondary-color) 50%, var(--primary-color) 100%);
+            color: #fff;
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 20%, rgba(40, 167, 69, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(0, 123, 255, 0.2) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/><circle cx="25" cy="25" r="0.5" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1.5" fill="white" opacity="0.1"/></svg>') repeat;
+        }
+        
+        .cta-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.03) 50%, transparent 70%);
+            animation: ctaShine 12s ease-in-out infinite;
+        }
+        
+        @keyframes ctaShine {
+            0%, 100% { transform: translateX(-100%) skewX(-15deg); }
+            50% { transform: translateX(100%) skewX(-15deg); }
+        }
+        
+        .cta-container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .cta-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .cta-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .cta-text {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
             opacity: 0.9;
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .cta-btn {
+            padding: 1.2rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+            justify-content: center;
+        }
+        
+        .cta-btn-primary {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            color: var(--primary-color);
+            box-shadow: 0 8px 32px rgba(255,255,255,0.2);
+        }
+        
+        .cta-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+        }
+        
+        .cta-btn-primary:hover {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .cta-btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            text-decoration: none;
         }
         
         /* Footer */
@@ -579,6 +940,13 @@ $markets = getMarketData('us_stocks', 6);
 
     <!-- Hero Section -->
     <section class="hero-section">
+        <div class="hero-floating-elements">
+            <div class="floating-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="floating-icon"><i class="fas fa-coins"></i></div>
+            <div class="floating-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="floating-icon"><i class="fas fa-dollar-sign"></i></div>
+            <div class="floating-icon"><i class="fas fa-trending-up"></i></div>
+        </div>
         <div class="hero-content">
             <h1 class="hero-title">
                 <?php echo getCurrentLang() == 'tr' ? 
@@ -712,25 +1080,130 @@ $markets = getMarketData('us_stocks', 6);
         </div>
     </section>
 
+    <!-- Education Section -->
+    <section class="education-section">
+        <div class="container">
+            <div class="text-center">
+                <h2 style="font-size: 3rem; font-weight: 800; color: var(--secondary-color); margin-bottom: 1rem;">
+                    <?php echo getCurrentLang() == 'tr' ? 'Trading Akademisi' : 'Trading Academy'; ?>
+                </h2>
+                <p style="font-size: 1.2rem; color: #666; max-width: 700px; margin: 0 auto;">
+                    <?php echo getCurrentLang() == 'tr' ? 
+                        'Profesyonel trader olmak için ihtiyacınız olan tüm bilgileri uzman analistlerimizden öğrenin' : 
+                        'Learn everything you need to become a professional trader from our expert analysts'; ?>
+                </p>
+            </div>
+            
+            <div class="education-grid">
+                <!-- Forex Trading Card -->
+                <div class="education-card">
+                    <div class="education-header">
+                        <div class="education-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <h3 class="education-title">
+                            <?php echo getCurrentLang() == 'tr' ? 'Forex Trading' : 'Forex Trading'; ?>
+                        </h3>
+                        <p class="education-subtitle">
+                            <?php echo getCurrentLang() == 'tr' ? 'Döviz Piyasası Uzmanı' : 'Currency Market Expert'; ?>
+                        </p>
+                    </div>
+                    <div class="education-content">
+                        <ul class="education-features">
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Major çiftler analizi (EUR/USD, GBP/USD)' : 'Major pairs analysis (EUR/USD, GBP/USD)'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Teknik analiz ve chart pattern\'ları' : 'Technical analysis and chart patterns'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Risk yönetimi ve pozisyon boyutlandırma' : 'Risk management and position sizing'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Ekonomik takvim ve haber analizi' : 'Economic calendar and news analysis'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Demo hesap ile pratik yapma' : 'Practice with demo account'; ?></li>
+                        </ul>
+                        <a href="markets.php?category=forex_major" class="education-cta">
+                            <i class="fas fa-play me-2"></i>
+                            <?php echo getCurrentLang() == 'tr' ? 'Forex\'e Başla' : 'Start Forex'; ?>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stock Trading Card -->
+                <div class="education-card">
+                    <div class="education-header">
+                        <div class="education-icon" style="background: linear-gradient(135deg, var(--success-color), #20c997);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="education-title">
+                            <?php echo getCurrentLang() == 'tr' ? 'Hisse Senedi Analizi' : 'Stock Analysis'; ?>
+                        </h3>
+                        <p class="education-subtitle">
+                            <?php echo getCurrentLang() == 'tr' ? 'Borsa Uzmanı' : 'Stock Market Expert'; ?>
+                        </p>
+                    </div>
+                    <div class="education-content">
+                        <ul class="education-features">
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Apple, Tesla, Microsoft hisse analizi' : 'Apple, Tesla, Microsoft stock analysis'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Fundamental analiz teknikleri' : 'Fundamental analysis techniques'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Portföy diversifikasyonu stratejileri' : 'Portfolio diversification strategies'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Kazanç raporları değerlendirmesi' : 'Earnings reports evaluation'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Long-term yatırım stratejileri' : 'Long-term investment strategies'; ?></li>
+                        </ul>
+                        <a href="markets.php?category=us_stocks" class="education-cta">
+                            <i class="fas fa-play me-2"></i>
+                            <?php echo getCurrentLang() == 'tr' ? 'Hisse Senetlerine Başla' : 'Start Stock Trading'; ?>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Crypto Trading Card -->
+                <div class="education-card">
+                    <div class="education-header">
+                        <div class="education-icon" style="background: linear-gradient(135deg, var(--warning-color), #e0a800);">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <h3 class="education-title">
+                            <?php echo getCurrentLang() == 'tr' ? 'Kripto Para Trading' : 'Crypto Trading'; ?>
+                        </h3>
+                        <p class="education-subtitle">
+                            <?php echo getCurrentLang() == 'tr' ? 'Blockchain Uzmanı' : 'Blockchain Expert'; ?>
+                        </p>
+                    </div>
+                    <div class="education-content">
+                        <ul class="education-features">
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Bitcoin ve Ethereum analizi' : 'Bitcoin and Ethereum analysis'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Altcoin seçim stratejileri' : 'Altcoin selection strategies'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'DeFi protokolleri ve yield farming' : 'DeFi protocols and yield farming'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Blockchain teknolojisi temelleri' : 'Blockchain technology fundamentals'; ?></li>
+                            <li><?php echo getCurrentLang() == 'tr' ? 'Kripto volatilitesi yönetimi' : 'Crypto volatility management'; ?></li>
+                        </ul>
+                        <a href="markets.php?category=commodities" class="education-cta">
+                            <i class="fas fa-play me-2"></i>
+                            <?php echo getCurrentLang() == 'tr' ? 'Kripto\'ya Başla' : 'Start Crypto'; ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta-section">
-        <div class="container">
+        <div class="cta-container">
+            <div class="cta-badge">
+                <?php echo getCurrentLang() == 'tr' ? '🚀 Sınırlı Süreli Fırsat' : '🚀 Limited Time Offer'; ?>
+            </div>
             <h2 class="cta-title">
-                <?php echo getCurrentLang() == 'tr' ? 'Yatırıma Başlamaya Hazır Mısınız?' : 'Ready to Start Investing?'; ?>
+                <?php echo getCurrentLang() == 'tr' ? 'Yatırım Yolculuğunuza Hemen Başlayın!' : 'Start Your Investment Journey Now!'; ?>
             </h2>
             <p class="cta-text">
                 <?php echo getCurrentLang() == 'tr' ? 
-                    'Dakikalar içinde hesap açın ve yatırım dünyasına adım atın. Uzman ekibimiz size yardımcı olmaya hazır.' : 
-                    'Open an account in minutes and step into the investment world. Our expert team is ready to help you.'; ?>
+                    'Profesyonel araçlar, uzman analizler ve güvenli altyapı ile yatırımlarınızı bir sonraki seviyeye taşıyın. İlk yatırımınızda %100 bonus kazanma fırsatını kaçırmayın!' : 
+                    'Take your investments to the next level with professional tools, expert analysis and secure infrastructure. Don\'t miss the opportunity to earn 100% bonus on your first investment!'; ?>
             </p>
-            <div class="hero-cta">
-                <a href="register.php" class="btn-hero btn-hero-primary">
-                    <i class="fas fa-user-plus"></i>
+            <div class="cta-buttons">
+                <a href="register.php" class="cta-btn cta-btn-primary">
+                    <i class="fas fa-rocket"></i>
                     <?php echo getCurrentLang() == 'tr' ? 'Ücretsiz Hesap Aç' : 'Open Free Account'; ?>
                 </a>
-                <a href="markets.php" class="btn-hero btn-hero-secondary">
-                    <i class="fas fa-chart-bar"></i>
-                    <?php echo getCurrentLang() == 'tr' ? 'Demo Hesap Deneyin' : 'Try Demo Account'; ?>
+                <a href="markets.php" class="cta-btn cta-btn-secondary">
+                    <i class="fas fa-chart-line"></i>
+                    <?php echo getCurrentLang() == 'tr' ? 'Piyasaları Keşfet' : 'Explore Markets'; ?>
                 </a>
             </div>
         </div>
